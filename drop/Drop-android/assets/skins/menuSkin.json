@@ -10,4 +10,8 @@
     "com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": { 
         "default": { "up": "blue_button02-9" , "down": "blue_button03-9", "font": buttonfont, "pressedOffsetY": -4 }
     }
+    
+    "com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle": { 
+        "default": { "background": "blue_panel-9", "titleFont": buttonfont }
+    }
  }

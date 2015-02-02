@@ -18,24 +18,26 @@ public class MainMenuScreen implements Screen {
     //private Texture texture = new Texture(Gdx.files.internal("img/title.png"));
     //private Image titleImage = new Image(texture);
 	
-	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT));
-	private Table table = new Table();
+	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT));	 //Create stage with viewport of given virtual size
+	private Table table = new Table();													 //Create table to arrange menu buttons
 	
 	
-	private Skin skin = new Skin(
+	private Skin skin = new Skin(														 //Create skin for menu							
 			Gdx.files.internal("skins/menuSkin.json"),
 			new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack")));
  
-	private TextButton buttonPlay = new TextButton("Play", skin);
-	private TextButton buttonSound = new TextButton("Sound: on", skin);
+	private TextButton buttonPlay = new TextButton("Play", skin);						//Create text buttons for menu options
+	private TextButton buttonSound = new TextButton("Sound: On", skin);
 	private TextButton buttonExit = new TextButton("Quit", skin);
 	
 	@Override
 	public void show() {
+		
 		MenuListener menuListener = new MenuListener();
 		buttonPlay.addListener(menuListener);
 		buttonSound.addListener(menuListener);
 		buttonExit.addListener(menuListener);
+		
 		buttonPlay.setName("Play");
 		buttonSound.setName("Sound");
 		buttonExit.setName("Exit");
@@ -67,18 +69,6 @@ public class MainMenuScreen implements Screen {
 	}
 
 	@Override
-	public void pause() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void resume() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void hide() {
 		dispose();
 	}
@@ -87,6 +77,14 @@ public class MainMenuScreen implements Screen {
 	public void dispose() {
 		stage.dispose();
 		skin.dispose();
+	}
+	
+	@Override
+	public void pause() {
+	}
+
+	@Override
+	public void resume() {
 	}
 	
 	/**
@@ -103,11 +101,11 @@ public class MainMenuScreen implements Screen {
 			else if (actor.getName().equals("Sound")) {
 				if (DropGame.SOUND_ON) {
 					DropGame.SOUND_ON = false;
-					((TextButton) actor).setText("Sound: off");
+					((TextButton) actor).setText("Sound: Off");
 				}
 				else {
 					DropGame.SOUND_ON = true;
-					((TextButton) actor).setText("Sound: on");
+					((TextButton) actor).setText("Sound: On");
 				}
 			}
 			else if ((actor.getName().equals("Exit"))) {

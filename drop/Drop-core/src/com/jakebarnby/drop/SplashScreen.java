@@ -12,18 +12,26 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 
+/**
+ * Splash screen for drop game, displays a fading logo then redirects suer to main menu screen
+ * @author Jake Barnby
+ *
+ */
 public class SplashScreen implements Screen {
-    private Texture texture = new Texture(Gdx.files.internal("img/splashlogo.png"));
-    private Image splashImage = new Image(texture);
-    private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT));
+    private Texture texture = new Texture(Gdx.files.internal("img/splashlogo.png"));    //Load splash logo image
+    private Image splashImage = new Image(texture);										//Create image from texture of splash logo
+    private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT));	//Create stage to display the logo
 
 	@Override
 	public void show() {
 		stage.addActor(splashImage);
 		
+		/*Set the alpha of the image to 0 for completely transparent so it can be faded in and out,
+		  set position of image directly in the center of the screen then change to main menu.      */
+		
 		splashImage.setColor(1, 1, 1, 0);
 		splashImage.setPosition(DropGame.WIDTH/2 - splashImage.getWidth()/2, DropGame.HEIGHT/2 - splashImage.getHeight()/2);
-		splashImage.addAction(Actions.sequence(delay(1.0f), fadeIn(2.0f), delay(3.0f), fadeOut(2.0f), run(new Runnable() {
+		splashImage.addAction(Actions.sequence(delay(0.5f), fadeIn(1.5f), delay(2.0f), fadeOut(1.5f), run(new Runnable() {
             @Override
             public void run() {
                 ((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen());
@@ -52,15 +60,15 @@ public class SplashScreen implements Screen {
 	}
 	
 	@Override
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height, true);
+	}
+	
+	@Override
 	public void pause() {
 	}
 
 	@Override
 	public void resume() {
-	}
-
-	@Override
-	public void resize(int width, int height) {
-		stage.getViewport().update(width, height, true);
 	}
 }
