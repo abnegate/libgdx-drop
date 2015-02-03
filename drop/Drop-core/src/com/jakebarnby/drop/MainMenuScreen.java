@@ -112,7 +112,7 @@ public class MainMenuScreen implements Screen {
 		public void changed(ChangeEvent event, Actor actor) {
 			if (actor.getName().equals("Play")) {
 				if (!actionResolver.getSignedInGPGS()) actionResolver.loginGPGS();
-				((Game) Gdx.app.getApplicationListener()).setScreen(new GameScreen());
+				((Game) Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
 			} 
 			else if (actor.getName().equals("Leaderboard")) {
 				if (actionResolver.getSignedInGPGS()) actionResolver.getLeaderboardGPGS();

@@ -59,7 +59,12 @@ public class GameScreen implements Screen {
 	
 	
 	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
+	private ActionResolver actionResolver;
 	
+
+	public GameScreen(ActionResolver actionResolver) {
+		this.actionResolver = actionResolver;
+	}
 
 	@Override
 	public void show() {
@@ -188,7 +193,17 @@ public class GameScreen implements Screen {
 				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))))
 		.show(stage);
 
-		gameOver = true;	
+		gameOver = true;
+		if (actionResolver.getSignedInGPGS()) {
+			actionResolver.submitScoreGPGS(Integer.valueOf(score));
+			if (Integer.valueOf(score) > 100) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAQ");
+			if (Integer.valueOf(score) > 200) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAg");
+			if (Integer.valueOf(score) > 300) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAw");
+			if (Integer.valueOf(score) > 400) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBA");
+			if (Integer.valueOf(score) > 500) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBQ");
+			if (Integer.valueOf(score) > 750) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBg");
+			if (Integer.valueOf(score) > 1000) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQCA");
+		}
 	}
 
 
@@ -219,19 +234,20 @@ public class GameScreen implements Screen {
 		public DropDialog(String title, Skin skin) {
 			super(title, skin);
 			
-			button("Quit", "Quit");
+			button("Back", "Back");
 			button("Try again", "Try again");
-			text("\nYou lose!\nYour score " + Integer.valueOf(score) + "\n\n");
+			text("\nYou lose!\nYour score: " + Integer.valueOf(score) + "\n\n");
 		}
 		
 		@Override 
 		protected void result(Object object) {
-			if (((String)object).equals("Quit")) {
-				Gdx.app.exit();
+			if (((String)object).equals("Back")) {
+				dispose();
+				((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen(actionResolver));
 			}
 			else if (((String)object).equals("Try again")) {
 				dispose();
-				((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen());
+				((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
 			}
 		}
 
