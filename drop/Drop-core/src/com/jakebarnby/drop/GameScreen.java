@@ -2,6 +2,7 @@ package com.jakebarnby.drop;
 
 import java.util.Iterator;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
@@ -54,6 +55,8 @@ public class GameScreen implements Screen {
 	private BitmapFont mBitmapFont;
 	private String score = "0";
 	
+	private boolean gameOver = false;
+	
 	
 	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
 	
@@ -73,7 +76,7 @@ public class GameScreen implements Screen {
 		camera.setToOrtho(false, DropGame.WIDTH, DropGame.HEIGHT);
 
 		// Sets the position of the bucket image
-		bucket.x = DropGame.HEIGHT / 2 - bucketImage.getWidth() / 2;
+		bucket.x = DropGame.WIDTH / 2 - bucketImage.getWidth() / 2;
 		bucket.y = 20;
 		bucket.width = bucketImage.getWidth();
 		bucket.height = bucketImage.getHeight();
@@ -97,14 +100,15 @@ public class GameScreen implements Screen {
 		// Clear screen and set color to blue
 		Gdx.gl.glClearColor(0, 0, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+		Gdx.input.setInputProcessor(stage);
+		
 		draw();
 		
 		stage.act(delta);
 		stage.draw();
 		
 		// If screen is touched
-		if (Gdx.input.isTouched()) {
+		if (Gdx.input.isTouched() && !gameOver) {
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(touchPos);
 			bucket.x = touchPos.x - 64 / 2;
@@ -159,10 +163,12 @@ public class GameScreen implements Screen {
 			// Raindrop is off screen
 			if (raindrop.y + 64 < 0) {
 				iter.remove();
-				gameOver();
+				if (!gameOver) {
+					gameOver();
+				}
 			}
 			// Raindrop is caught
-			if (raindrop.overlaps(bucket)) {
+			if (raindrop.overlaps(bucket) && !gameOver) {
 				if (DropGame.SOUND_ON) {
 					dropSound.play();
 				}
@@ -177,14 +183,12 @@ public class GameScreen implements Screen {
 	 * 
 	 */
 	private void gameOver() {
-		Dialog d = new DropDialog("Game Over", new Skin(						
+		new DropDialog("Game Over", new Skin(						
 				Gdx.files.internal("skins/menuSkin.json"),
-				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack")))
-		);
-		
-		d.show(stage);
-		d.setModal(false);
-		
+				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))))
+		.show(stage);
+
+		gameOver = true;	
 	}
 
 
@@ -198,26 +202,38 @@ public class GameScreen implements Screen {
 	}
 
 	@Override
-	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
-
-	}
+	public void resize(int width, int height) {}
 
 	@Override
-	public void hide() {
-		// TODO Auto-generated method stub
-
-	}
+	public void hide() {}
 
 	@Override
-	public void pause() {
-		// TODO Auto-generated method stub
-
-	}
+	public void pause() {}
 
 	@Override
-	public void resume() {
-		// TODO Auto-generated method stub
+	public void resume() {}
+	
+	
+	public class DropDialog extends Dialog {
+
+		public DropDialog(String title, Skin skin) {
+			super(title, skin);
+			
+			button("Quit", "Quit");
+			button("Try again", "Try again");
+			text("\nYou looooose!\n\n");
+		}
+		
+		@Override 
+		protected void result(Object object) {
+			if (((String)object).equals("Quit")) {
+				Gdx.app.exit();
+			}
+			else if (((String)object).equals("Try again")) {
+				dispose();
+				((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen());
+			}
+		}
 
 	}
 }
