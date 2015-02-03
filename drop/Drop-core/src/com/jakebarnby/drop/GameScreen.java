@@ -221,7 +221,7 @@ public class GameScreen implements Screen {
 			
 			button("Quit", "Quit");
 			button("Try again", "Try again");
-			text("\nYou looooose!\n\n");
+			text("\nYou lose!\nYour score " + Integer.valueOf(score) + "\n\n");
 		}
 		
 		@Override 

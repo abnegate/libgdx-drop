@@ -18,9 +18,14 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
  *
  */
 public class SplashScreen implements Screen {
+	private ActionResolver ar;
     private Texture texture = new Texture(Gdx.files.internal("img/splashlogo.png"));    //Load splash logo image
     private Image splashImage = new Image(texture);										//Create image from texture of splash logo
     private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT));	//Create stage to display the logo
+
+	public SplashScreen(ActionResolver actionResolver) {
+		ar = actionResolver;
+	}
 
 	@Override
 	public void show() {
@@ -34,7 +39,7 @@ public class SplashScreen implements Screen {
 		splashImage.addAction(Actions.sequence(delay(0.5f), fadeIn(1.5f), delay(2.0f), fadeOut(1.5f), run(new Runnable() {
             @Override
             public void run() {
-                ((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen());
+                ((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen(ar));
             }
         })));
 	}
