@@ -13,11 +13,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+/**
+ * Mani menu screen of Drop game
+ * @author Jake Barnby
+ *
+ */
 public class MainMenuScreen implements Screen {
-
-	// private Texture texture = new
-	// Texture(Gdx.files.internal("img/title.png"));
-	// private Image titleImage = new Image(texture);
 
 	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT)); // Create stage with viewport of given virtual size
 
@@ -25,34 +26,42 @@ public class MainMenuScreen implements Screen {
 			Gdx.files.internal("skins/menuSkin.json"), new TextureAtlas(
 					Gdx.files.internal("skins/menuSkin.pack")));
 
-	private TextButton buttonPlay = new TextButton("Play", skin); // Create text buttons for menu options
+	// Create text buttons for menu options
+	private TextButton buttonPlay = new TextButton("Play", skin); 
 	private TextButton buttonLeader = new TextButton("Leaderboard", skin);
 	private TextButton buttonAchieve = new TextButton("Achievements", skin);
 	private TextButton buttonSound = new TextButton("Sound: On", skin);
 	private TextButton buttonExit = new TextButton("Quit", skin);
 
+	//Action Resolver for resolving google play game service events
 	private ActionResolver actionResolver;
 
-	public MainMenuScreen(ActionResolver ar) {
-		actionResolver = ar;
+	/**
+	 * Create a new main menu screen
+	 * @param actionResolver The ActionResolver used to resolve google play game service events
+	 */
+	public MainMenuScreen(ActionResolver actionResolver) {
+		this.actionResolver = actionResolver;
 	}
 
 	@Override
 	public void show() {
-
+		//Add a button listener to all the menu buttons
 		MenuListener menuListener = new MenuListener();
 		buttonPlay.addListener(menuListener);
 		buttonLeader.addListener(menuListener);
 		buttonAchieve.addListener(menuListener);
 		buttonSound.addListener(menuListener);
 		buttonExit.addListener(menuListener);
-
+		
+		//Set names of all buttons for dealing with presses
 		buttonPlay.setName("Play");
 		buttonLeader.setName("Leaderboard");
 		buttonAchieve.setName("Achievements");
 		buttonSound.setName("Sound");
 		buttonExit.setName("Exit");
 
+		//Add all buttons to a table nad add table to the stage
 		Table table = new Table();
 		table.add(buttonPlay).size(DropGame.WIDTH, DropGame.HEIGHT / 15).row();
 		table.add(buttonLeader).size(DropGame.WIDTH, DropGame.HEIGHT / 15).row();
@@ -101,8 +110,7 @@ public class MainMenuScreen implements Screen {
 	}
 
 	/**
-	 * Used for listening and responding to button presses in the main menu of
-	 * Drop
+	 * Used for listening and responding to button presses in the main menu of Drop
 	 * 
 	 * @author Jake Barnby
 	 *

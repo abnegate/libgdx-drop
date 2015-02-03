@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -61,6 +62,8 @@ public class GameScreen implements Screen {
 	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
 	private ActionResolver actionResolver;
 	
+	private ParticleEffect p = new ParticleEffect();
+	
 
 	public GameScreen(ActionResolver actionResolver) {
 		this.actionResolver = actionResolver;
@@ -98,6 +101,8 @@ public class GameScreen implements Screen {
 		mBitmapFont = generator.generateFont(parameters);
 		mBitmapFont.setColor(1f, 1f, 1f, 1);
 		generator.dispose();
+		
+		p.load(Gdx.files.internal("effects/splash.p"), Gdx.files.internal("img"));
 	}
 
 	@Override
@@ -107,7 +112,7 @@ public class GameScreen implements Screen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		Gdx.input.setInputProcessor(stage);
 		
-		draw();
+		draw(delta);
 		
 		stage.act(delta);
 		stage.draw();
@@ -144,7 +149,7 @@ public class GameScreen implements Screen {
 	/**
 	 * 
 	 */
-	private void draw() {
+	private void draw(float delta) {
 		camera.update();
 		
 		// Draw bucket and raindrops
@@ -155,6 +160,10 @@ public class GameScreen implements Screen {
 		for (Rectangle raindrop : raindrops) {
 			batch.draw(dropImage, raindrop.x, raindrop.y);
 		}
+		
+		
+		p.draw(batch);
+		p.update(delta);
 		
 		// Draw players current score
 		mBitmapFont.draw(batch, score, 40, DropGame.HEIGHT - 20);
@@ -180,6 +189,12 @@ public class GameScreen implements Screen {
 				iter.remove();
 				int newScore = Integer.valueOf(score) + 1;
 				score = "" + newScore;
+				
+				
+				
+				p.setPosition(bucket.x, bucket.y + bucket.height + 10);
+				p.start();
+				System.out.println("ParticleEffect drawn");
 			}
 		}
 	}
@@ -211,9 +226,11 @@ public class GameScreen implements Screen {
 	public void dispose() {
 		dropImage.dispose();
 		bucketImage.dispose();
+		//TODO: Should only be disposed if sound is enabled
 		dropSound.dispose();
 		rainMusic.dispose();
 		batch.dispose();
+		
 	}
 
 	@Override

@@ -23,6 +23,11 @@ public class SplashScreen implements Screen {
     private Image splashImage = new Image(texture);										//Create image from texture of splash logo
     private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT));	//Create stage to display the logo
 
+    
+    /**
+     * Creates a new splash screen
+	 * @param actionResolver The ActionResolver used to resolve google play game service events
+	 */
 	public SplashScreen(ActionResolver actionResolver) {
 		ar = actionResolver;
 	}

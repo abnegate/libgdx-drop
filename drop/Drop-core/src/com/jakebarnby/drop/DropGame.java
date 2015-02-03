@@ -9,7 +9,7 @@ import com.badlogic.gdx.Game;
  */
 public class DropGame extends Game {
 	
-	private ActionResolver actionResolver;
+	private ActionResolver actionResolver;			//Action resolver for resolving google play game service events
 	
 	public static final String TITLE = "Drop";		//Cached title
 	public static final int WIDTH = 480;			//Cached virtual width of game screens
@@ -17,6 +17,10 @@ public class DropGame extends Game {
 	
 	public static boolean SOUND_ON = true;			//Global boolean determining whether sound is enabled or not during gameplay
 
+	/**
+	 * Create a new Drop game instance
+	 * @param actionResolver The ActionResolver used to resolve google play game service events
+	 */
 	public DropGame(ActionResolver actionResolver) {
 		this.actionResolver = actionResolver;
 	}
