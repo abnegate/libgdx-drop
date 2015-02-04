@@ -149,4 +149,4 @@ additive: true
 behind: false
 premultipliedAlpha: false
 - Image Path -
-droplet.png
+droplet_blue.png

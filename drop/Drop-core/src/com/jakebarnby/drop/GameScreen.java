@@ -42,8 +42,9 @@ public class GameScreen implements Screen {
 	private long lastDropTime; 										// Last time a raindrop was spawned
 
 	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));	  // Cached title image
-	private Texture dropImage = new Texture(Gdx.files.internal("img/droplet.png"));   // Cached raindrop image
-	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png"));  // Cached bucket image
+	private Texture dropletBlue = new Texture(Gdx.files.internal("img/droplet_blue.png"));   // Cached raindrop image
+	private Texture dropletRed = new Texture(Gdx.files.internal("img/droplet_red.png"));  // Cached bucket image
+	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png")); 
 	
 	private Sound dropSound; 	// Cached raindrop sound
 	private Music rainMusic; 	// Cached background rain music
@@ -62,7 +63,8 @@ public class GameScreen implements Screen {
 	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
 	private ActionResolver actionResolver;
 	
-	private ParticleEffect p = new ParticleEffect();
+	private ParticleEffect water = new ParticleEffect();
+	private ParticleEffect fire = new ParticleEffect();
 	
 
 	public GameScreen(ActionResolver actionResolver) {
@@ -76,7 +78,6 @@ public class GameScreen implements Screen {
 			// Load the drop sound effect and rain background music
 			dropSound = Gdx.audio.newSound(Gdx.files.internal("audio/drop.wav"));
 			rainMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/rain.mp3"));
-
 			rainMusic.setLooping(true);
 			rainMusic.play();
 		}
@@ -102,7 +103,8 @@ public class GameScreen implements Screen {
 		mBitmapFont.setColor(1f, 1f, 1f, 1);
 		generator.dispose();
 		
-		p.load(Gdx.files.internal("effects/splash.p"), Gdx.files.internal("img"));
+		water.load(Gdx.files.internal("effects/splash.p"), Gdx.files.internal("img"));
+		fire.load(Gdx.files.internal("effects/fire.p"), Gdx.files.internal("img"));
 	}
 
 	@Override
@@ -121,7 +123,7 @@ public class GameScreen implements Screen {
 		if (Gdx.input.isTouched() && !gameOver) {
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(touchPos);
-			bucket.x = touchPos.x - 64 / 2;
+			bucket.x = touchPos.x - bucket.width / 2;
 		}
 
 		// If need new raindrop
@@ -138,10 +140,10 @@ public class GameScreen implements Screen {
 	 */
 	private void spawnRaindrop() {
 		Rectangle raindrop = new Rectangle();
-		raindrop.x = MathUtils.random(0, DropGame.WIDTH - dropImage.getWidth());
+		raindrop.x = MathUtils.random(0, DropGame.WIDTH - dropletBlue.getWidth());
 		raindrop.y = DropGame.HEIGHT - titleImage.getHeight();
-		raindrop.width = dropImage.getWidth();
-		raindrop.height = dropImage.getHeight();
+		raindrop.width = dropletBlue.getWidth();
+		raindrop.height = dropletBlue.getHeight();
 		raindrops.add(raindrop);
 		lastDropTime = TimeUtils.nanoTime();
 	}
@@ -157,13 +159,15 @@ public class GameScreen implements Screen {
 		batch.begin();
 		batch.draw(titleImage, 0, DropGame.HEIGHT - titleImage.getHeight());
 		batch.draw(bucketImage, bucket.x, bucket.y);
-		for (Rectangle raindrop : raindrops) {
-			batch.draw(dropImage, raindrop.x, raindrop.y);
+		for (int i = 0; i < raindrops.size; i++) {
+			batch.draw(dropletBlue, raindrops.get(i).x, raindrops.get(i).y);
 		}
 		
 		
-		p.draw(batch);
-		p.update(delta);
+		water.draw(batch);
+		fire.draw(batch);;
+		water.update(delta);
+		fire.update(delta);
 		
 		// Draw players current score
 		mBitmapFont.draw(batch, score, 40, DropGame.HEIGHT - 20);
@@ -190,11 +194,8 @@ public class GameScreen implements Screen {
 				int newScore = Integer.valueOf(score) + 1;
 				score = "" + newScore;
 				
-				
-				
-				p.setPosition(bucket.x, bucket.y + bucket.height + 10);
-				p.start();
-				System.out.println("ParticleEffect drawn");
+				water.setPosition(bucket.x, bucket.y + bucket.height + 10);
+				water.start();
 			}
 		}
 	}
@@ -224,13 +225,13 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void dispose() {
-		dropImage.dispose();
+		if (DropGame.SOUND_ON) {
+			dropSound.dispose();
+			rainMusic.dispose();
+		}
+		dropletBlue.dispose();
 		bucketImage.dispose();
-		//TODO: Should only be disposed if sound is enabled
-		dropSound.dispose();
-		rainMusic.dispose();
 		batch.dispose();
-		
 	}
 
 	@Override
@@ -253,7 +254,7 @@ public class GameScreen implements Screen {
 			
 			button("Back", "Back");
 			button("Try again", "Try again");
-			text("\nYou lose!\nYour score: " + Integer.valueOf(score) + "\n\n");
+			text("\n     You lose!\nYour score: " + Integer.valueOf(score) + "\n");
 		}
 		
 		@Override 

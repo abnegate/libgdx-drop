@@ -118,13 +118,18 @@ public class MainMenuScreen implements Screen {
 	private class MenuListener extends ChangeListener {
 		@Override
 		public void changed(ChangeEvent event, Actor actor) {
+			//TODO: Crashes on button press if user logs out of GPGS
+			
 			if (actor.getName().equals("Play")) {
 				if (!actionResolver.getSignedInGPGS()) actionResolver.loginGPGS();
 				((Game) Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
 			} 
 			else if (actor.getName().equals("Leaderboard")) {
 				if (actionResolver.getSignedInGPGS()) actionResolver.getLeaderboardGPGS();
-				else actionResolver.loginGPGS();
+				else {
+					actionResolver.loginGPGS();
+					System.out.println("Not logged in, attempting to log in");
+				}
 			} 
 			else if (actor.getName().equals("Achievements")) {
 				if (actionResolver.getSignedInGPGS()) actionResolver.getAchievementGPGS();
