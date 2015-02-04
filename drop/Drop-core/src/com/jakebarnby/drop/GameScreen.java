@@ -36,7 +36,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  */
 public class GameScreen implements Screen {
 
-	private Array<Rectangle> raindrops = new Array<Rectangle>(); 	// List of the raindrops that fall
+	private Array<Raindrop> raindrops = new Array<Raindrop>(); 	// List of the raindrops that fall
 	private long dropTimeGap = 800000000; 							// Total time in game, used for controlling speed
 	private float dropSpeed = 1f;									// Speed at which the raindrops fall
 	private long lastDropTime; 										// Last time a raindrop was spawned
@@ -65,6 +65,8 @@ public class GameScreen implements Screen {
 	
 	private ParticleEffect water = new ParticleEffect();
 	private ParticleEffect fire = new ParticleEffect();
+	
+	private int dropsSpawned = 0;
 	
 
 	public GameScreen(ActionResolver actionResolver) {
@@ -104,7 +106,7 @@ public class GameScreen implements Screen {
 		generator.dispose();
 		
 		water.load(Gdx.files.internal("effects/splash.p"), Gdx.files.internal("img"));
-		fire.load(Gdx.files.internal("effects/fire.p"), Gdx.files.internal("img"));
+		fire.load(Gdx.files.internal("effects/flame.p"), Gdx.files.internal("img"));
 	}
 
 	@Override
@@ -139,13 +141,24 @@ public class GameScreen implements Screen {
 	 * Create a new raindrop and record the time it was spawned.
 	 */
 	private void spawnRaindrop() {
-		Rectangle raindrop = new Rectangle();
-		raindrop.x = MathUtils.random(0, DropGame.WIDTH - dropletBlue.getWidth());
+		Raindrop raindrop;
+		if (dropsSpawned < 10) {
+			raindrop = new Raindrop("droplet_blue.png", false);
+		}
+		else {
+			raindrop = new Raindrop("droplet_red.png", true);
+			dropsSpawned = 0;
+		}
+		
+		raindrop.x = MathUtils.random(0, DropGame.WIDTH - raindrop.getDropletImage().getWidth());
 		raindrop.y = DropGame.HEIGHT - titleImage.getHeight();
-		raindrop.width = dropletBlue.getWidth();
-		raindrop.height = dropletBlue.getHeight();
+		raindrop.width = raindrop.getDropletImage().getWidth();
+		raindrop.height = raindrop.getDropletImage().getHeight();
+		
 		raindrops.add(raindrop);
 		lastDropTime = TimeUtils.nanoTime();
+		
+		dropsSpawned++;
 	}
 	
 	/**
@@ -159,8 +172,9 @@ public class GameScreen implements Screen {
 		batch.begin();
 		batch.draw(titleImage, 0, DropGame.HEIGHT - titleImage.getHeight());
 		batch.draw(bucketImage, bucket.x, bucket.y);
+		
 		for (int i = 0; i < raindrops.size; i++) {
-			batch.draw(dropletBlue, raindrops.get(i).x, raindrops.get(i).y);
+			raindrops.get(i).draw(batch);
 		}
 		
 		
@@ -174,9 +188,9 @@ public class GameScreen implements Screen {
 		batch.end();
 		
 		// Draw raindrops moving
-		Iterator<Rectangle> iter = raindrops.iterator();
+		Iterator<Raindrop> iter = raindrops.iterator();
 		while (iter.hasNext()) {
-			Rectangle raindrop = iter.next();
+			Raindrop raindrop = iter.next();
 			raindrop.y -= (250 * dropSpeed) * Gdx.graphics.getDeltaTime();
 			// Raindrop is off screen
 			if (raindrop.y + 64 < 0) {
@@ -190,12 +204,18 @@ public class GameScreen implements Screen {
 				if (DropGame.SOUND_ON) {
 					dropSound.play();
 				}
-				iter.remove();
-				int newScore = Integer.valueOf(score) + 1;
-				score = "" + newScore;
+				if (!raindrop.isFlaming()) {
+					iter.remove();
+					int newScore = Integer.valueOf(score) + 1;
+					score = "" + newScore;
 				
-				water.setPosition(bucket.x, bucket.y + bucket.height + 10);
-				water.start();
+					water.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height + 10);
+					water.start();
+				} else {
+					fire.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height- 5);
+					fire.start();
+					gameOver();
+				}
 			}
 		}
 	}
