@@ -1,6 +1,7 @@
 package com.jakebarnby.drop;
 
 import java.util.Iterator;
+import java.util.Random;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -33,7 +34,7 @@ import com.jakebarnby.drop.FallingObject.Type;
  * 
  * @author Jake Barnby
  * 
- *         8 December 2014
+ * 8 December 2014
  */
 public class GameScreen implements Screen {
 
@@ -45,8 +46,13 @@ public class GameScreen implements Screen {
 	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));	  // Cached title image
 	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png")); 
 	
+	private ParticleEffect water = new ParticleEffect();
+	private ParticleEffect fire = new ParticleEffect();
+	private ParticleEffect ice = new ParticleEffect();
+	
 	private Sound dropSound; 	// Cached raindrop sound
 	private Sound bombSound;
+	private Sound freezeSound;
 	private Music rainMusic; 	// Cached background rain music
 
 	private Rectangle bucket = new Rectangle();		// Contains the item to draw
@@ -57,18 +63,15 @@ public class GameScreen implements Screen {
 	private BitmapFont mBitmapFont;
 	private String score = "0";
 	
-	private boolean gameOver = false;
-	
-	
 	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
 	private ActionResolver actionResolver;
 	
-	private ParticleEffect water = new ParticleEffect();
-	private ParticleEffect fire = new ParticleEffect();
+	private boolean gameOver = false;
 	
-	private int dropsSpawned = 0;
-	
-
+	/**
+	 * 
+	 * @param actionResolver
+	 */
 	public GameScreen(ActionResolver actionResolver) {
 		this.actionResolver = actionResolver;
 	}
@@ -77,9 +80,10 @@ public class GameScreen implements Screen {
 	public void show() {
 
 		if (DropGame.SOUND_ON) {
-			// Load the drop sound effect and rain background music
+			// Sound is turned on, load sounds and music
 			bombSound = Gdx.audio.newSound(Gdx.files.internal("audio/explosion.wav"));
 			dropSound = Gdx.audio.newSound(Gdx.files.internal("audio/drop.wav"));
+			freezeSound = Gdx.audio.newSound(Gdx.files.internal("audio/freeze.wav"));
 			rainMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/rain.mp3"));
 			rainMusic.setLooping(true);
 			rainMusic.play();
@@ -106,8 +110,9 @@ public class GameScreen implements Screen {
 		mBitmapFont.setColor(1f, 1f, 1f, 1);
 		generator.dispose();
 		
-		water.load(Gdx.files.internal("effects/splash.p"), Gdx.files.internal("img"));
-		fire.load(Gdx.files.internal("effects/flame.p"), Gdx.files.internal("img"));
+		water.load(Gdx.files.internal("effects/water.p"), Gdx.files.internal("img"));
+		fire.load(Gdx.files.internal("effects/fire.p"), Gdx.files.internal("img"));
+		ice.load(Gdx.files.internal("effects/ice.p"), Gdx.files.internal("img"));
 	}
 
 	@Override
@@ -143,18 +148,17 @@ public class GameScreen implements Screen {
 	 */
 	private void spawnFallingOjbect() {
 		FallingObject object;
-		if (dropsSpawned == 10) {
+		
+		Random rand = new Random();
+		if (rand.nextInt(15) == 0) {
 			object = new FallingObject("droplet_red.png", Type.BOMB);
 		}
-		else if (dropsSpawned == 20) {
+		else if (rand.nextInt(15) == 0) {
 			object = new FallingObject("droplet_white.png", Type.HAIL);
-			dropsSpawned = 0;
 		}
 		else {
 			object = new FallingObject("droplet_blue.png", Type.RAINDROP);
 		}
-		
-		dropsSpawned++;
 		
 		object.x = MathUtils.random(0, DropGame.WIDTH - object.getImage().getWidth());
 		object.y = DropGame.HEIGHT - titleImage.getHeight();
@@ -182,9 +186,11 @@ public class GameScreen implements Screen {
 		}
 		
 		water.draw(batch);
-		fire.draw(batch);;
+		fire.draw(batch);
+		ice.draw(batch);
 		water.update(delta);
 		fire.update(delta);
+		ice.update(delta);
 		
 		// Draw players current score
 		mBitmapFont.draw(batch, score, 40, DropGame.HEIGHT - 20);
@@ -204,24 +210,28 @@ public class GameScreen implements Screen {
 			}
 			// Raindrop is caught
 			if (object.overlaps(bucket) && !gameOver) {
-				catchObject(object, iter);
+				catchObject(object);
+				iter.remove();
 			}
 		}
 	}
 	
-	private void catchObject(FallingObject object, Iterator<FallingObject> iter) {
+	/**
+	 * 
+	 * @param object
+	 * @param iter
+	 */
+	private void catchObject(FallingObject object) {
 		if (object.getType() == Type.RAINDROP) {
 			if (DropGame.SOUND_ON) {
 				dropSound.play();
 			}
 			int newScore = Integer.valueOf(score) + 1;
 			score = "" + newScore;
-			iter.remove();
 		
 			water.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height + 10);
 			water.start();
-		} 
-		
+		} 	
 		else if (object.getType() == Type.BOMB) {
 			if (DropGame.SOUND_ON) {
 				bombSound.play();
@@ -231,7 +241,12 @@ public class GameScreen implements Screen {
 			gameOver();
 		}
 		else if (object.getType() == Type.HAIL) {
-			
+			if (DropGame.SOUND_ON) {
+				freezeSound.play();
+			}
+			ice.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height/2);
+			ice.start();
+			gameOver();
 		}
 	}
 
@@ -291,7 +306,7 @@ public class GameScreen implements Screen {
 			
 			button("Back", "Back");
 			button("Try again", "Try again");
-			text("\n     You lose!\nYour score: " + Integer.valueOf(score) + "\n");
+			text("\n      You lose!\nYour score: " + Integer.valueOf(score) + "\n");
 		}
 		
 		@Override 
