@@ -22,7 +22,8 @@ public class MainMenuScreen implements Screen {
 
 	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT)); // Create stage with viewport of given virtual size
 
-	private Skin skin = new Skin( // Create skin for menu
+	//Create skin for menu
+	private Skin skin = new Skin( 
 			Gdx.files.internal("skins/menuSkin.json"), new TextureAtlas(
 					Gdx.files.internal("skins/menuSkin.pack")));
 
@@ -46,6 +47,10 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void show() {
+		if (!DropGame.SOUND_ON) {
+			buttonSound.setText("Sound: Off");
+		}
+		
 		//Add a button listener to all the menu buttons
 		MenuListener menuListener = new MenuListener();
 		buttonPlay.addListener(menuListener);

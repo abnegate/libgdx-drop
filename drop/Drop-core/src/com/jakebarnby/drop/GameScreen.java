@@ -26,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.jakebarnby.drop.FallingObject.Type;
 
 /**
  * Main game screen for Drop game.
@@ -36,17 +37,16 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  */
 public class GameScreen implements Screen {
 
-	private Array<Raindrop> raindrops = new Array<Raindrop>(); 	// List of the raindrops that fall
+	private Array<FallingObject> fallingObjects = new Array<FallingObject>(); 	// List of the raindrops that fall
 	private long dropTimeGap = 800000000; 							// Total time in game, used for controlling speed
 	private float dropSpeed = 1f;									// Speed at which the raindrops fall
 	private long lastDropTime; 										// Last time a raindrop was spawned
 
 	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));	  // Cached title image
-	private Texture dropletBlue = new Texture(Gdx.files.internal("img/droplet_blue.png"));   // Cached raindrop image
-	private Texture dropletRed = new Texture(Gdx.files.internal("img/droplet_red.png"));  // Cached bucket image
 	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png")); 
 	
 	private Sound dropSound; 	// Cached raindrop sound
+	private Sound bombSound;
 	private Music rainMusic; 	// Cached background rain music
 
 	private Rectangle bucket = new Rectangle();		// Contains the item to draw
@@ -78,6 +78,7 @@ public class GameScreen implements Screen {
 
 		if (DropGame.SOUND_ON) {
 			// Load the drop sound effect and rain background music
+			bombSound = Gdx.audio.newSound(Gdx.files.internal("audio/explosion.wav"));
 			dropSound = Gdx.audio.newSound(Gdx.files.internal("audio/drop.wav"));
 			rainMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/rain.mp3"));
 			rainMusic.setLooping(true);
@@ -93,7 +94,7 @@ public class GameScreen implements Screen {
 		bucket.height = bucketImage.getHeight();
 
 		// Instantiate rain drops
-		spawnRaindrop();
+		spawnFallingOjbect();
 
 		// Get font asset for rendering text
 		FileHandle fontFile = Gdx.files.internal("fonts/RhumBanane.ttf");
@@ -130,7 +131,7 @@ public class GameScreen implements Screen {
 
 		// If need new raindrop
 		if (TimeUtils.nanoTime() - lastDropTime > dropTimeGap) {
-			spawnRaindrop();
+			spawnFallingOjbect();
 		}
 
 		dropSpeed += 0.00015f;
@@ -140,25 +141,28 @@ public class GameScreen implements Screen {
 	/**
 	 * Create a new raindrop and record the time it was spawned.
 	 */
-	private void spawnRaindrop() {
-		Raindrop raindrop;
-		if (dropsSpawned < 10) {
-			raindrop = new Raindrop("droplet_blue.png", false);
+	private void spawnFallingOjbect() {
+		FallingObject object;
+		if (dropsSpawned == 10) {
+			object = new FallingObject("droplet_red.png", Type.BOMB);
 		}
-		else {
-			raindrop = new Raindrop("droplet_red.png", true);
+		else if (dropsSpawned == 20) {
+			object = new FallingObject("droplet_white.png", Type.HAIL);
 			dropsSpawned = 0;
 		}
-		
-		raindrop.x = MathUtils.random(0, DropGame.WIDTH - raindrop.getDropletImage().getWidth());
-		raindrop.y = DropGame.HEIGHT - titleImage.getHeight();
-		raindrop.width = raindrop.getDropletImage().getWidth();
-		raindrop.height = raindrop.getDropletImage().getHeight();
-		
-		raindrops.add(raindrop);
-		lastDropTime = TimeUtils.nanoTime();
+		else {
+			object = new FallingObject("droplet_blue.png", Type.RAINDROP);
+		}
 		
 		dropsSpawned++;
+		
+		object.x = MathUtils.random(0, DropGame.WIDTH - object.getImage().getWidth());
+		object.y = DropGame.HEIGHT - titleImage.getHeight();
+		object.width = object.getImage().getWidth();
+		object.height = object.getImage().getHeight();
+		
+		fallingObjects.add(object);
+		lastDropTime = TimeUtils.nanoTime();
 	}
 	
 	/**
@@ -173,10 +177,9 @@ public class GameScreen implements Screen {
 		batch.draw(titleImage, 0, DropGame.HEIGHT - titleImage.getHeight());
 		batch.draw(bucketImage, bucket.x, bucket.y);
 		
-		for (int i = 0; i < raindrops.size; i++) {
-			raindrops.get(i).draw(batch);
+		for (int i = 0; i < fallingObjects.size; i++) {
+			fallingObjects.get(i).draw(batch);
 		}
-		
 		
 		water.draw(batch);
 		fire.draw(batch);;
@@ -187,39 +190,51 @@ public class GameScreen implements Screen {
 		mBitmapFont.draw(batch, score, 40, DropGame.HEIGHT - 20);
 		batch.end();
 		
-		// Draw raindrops moving
-		Iterator<Raindrop> iter = raindrops.iterator();
+		// Draw falling objects moving moving
+		Iterator<FallingObject> iter = fallingObjects.iterator();
 		while (iter.hasNext()) {
-			Raindrop raindrop = iter.next();
-			raindrop.y -= (250 * dropSpeed) * Gdx.graphics.getDeltaTime();
+			FallingObject object = iter.next();
+			object.y -= (250 * dropSpeed) * Gdx.graphics.getDeltaTime();
 			// Raindrop is off screen
-			if (raindrop.y + 64 < 0) {
+			if (object.y + object.getImage().getHeight() < 0 && object.getType() == Type.RAINDROP) {
 				iter.remove();
 				if (!gameOver) {
 					gameOver();
 				}
 			}
 			// Raindrop is caught
-			if (raindrop.overlaps(bucket) && !gameOver) {
-				if (DropGame.SOUND_ON) {
-					dropSound.play();
-				}
-				if (!raindrop.isFlaming()) {
-					iter.remove();
-					int newScore = Integer.valueOf(score) + 1;
-					score = "" + newScore;
-				
-					water.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height + 10);
-					water.start();
-				} else {
-					fire.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height- 5);
-					fire.start();
-					gameOver();
-				}
+			if (object.overlaps(bucket) && !gameOver) {
+				catchObject(object, iter);
 			}
 		}
 	}
 	
+	private void catchObject(FallingObject object, Iterator<FallingObject> iter) {
+		if (object.getType() == Type.RAINDROP) {
+			if (DropGame.SOUND_ON) {
+				dropSound.play();
+			}
+			int newScore = Integer.valueOf(score) + 1;
+			score = "" + newScore;
+			iter.remove();
+		
+			water.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height + 10);
+			water.start();
+		} 
+		
+		else if (object.getType() == Type.BOMB) {
+			if (DropGame.SOUND_ON) {
+				bombSound.play();
+			}
+			fire.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height- 5);
+			fire.start();
+			gameOver();
+		}
+		else if (object.getType() == Type.HAIL) {
+			
+		}
+	}
+
 	/**
 	 * 
 	 */
@@ -247,10 +262,12 @@ public class GameScreen implements Screen {
 	public void dispose() {
 		if (DropGame.SOUND_ON) {
 			dropSound.dispose();
+			bombSound.dispose();
 			rainMusic.dispose();
 		}
-		dropletBlue.dispose();
 		bucketImage.dispose();
+		water.dispose();
+		fire.dispose();
 		batch.dispose();
 	}
 
