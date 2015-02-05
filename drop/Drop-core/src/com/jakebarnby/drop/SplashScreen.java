@@ -15,6 +15,8 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 /**
  * Splash screen for drop game, displays a fading logo then redirects suer to main menu screen
  * @author Jake Barnby
+ * 
+ * 5 February 2015
  *
  */
 public class SplashScreen implements Screen {

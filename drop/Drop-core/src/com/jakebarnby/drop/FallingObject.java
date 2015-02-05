@@ -8,6 +8,8 @@ import com.badlogic.gdx.math.Rectangle;
 /**
  * A raindrop that falls down the screen in Drop game
  * @author Jake Barnby
+ * 
+ * 10 February 2015
  *
  */
 public class FallingObject extends Rectangle {

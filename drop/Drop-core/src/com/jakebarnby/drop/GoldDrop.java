@@ -1,5 +1,11 @@
 package com.jakebarnby.drop;
 
+/**
+ *  FallingObject which upgrades the bucket in Drop game
+ * @author Jake Barnby
+ * 
+ * 10 February 2015
+ */
 public class GoldDrop extends FallingObject {
 	
 	private static final long serialVersionUID = 5010440322240743061L;
@@ -23,7 +29,6 @@ public class GoldDrop extends FallingObject {
 		if (active) {
 			timeRemaining -= delta;
 			if (timeRemaining < 0) active = false;
-			System.out.println(timeRemaining);
 		}
 	}
 

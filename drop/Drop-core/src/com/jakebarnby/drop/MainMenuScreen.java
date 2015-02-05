@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 /**
  * Mani menu screen of Drop game
  * @author Jake Barnby
+ * 
+ * 5 February 2015
  *
  */
 public class MainMenuScreen implements Screen {
