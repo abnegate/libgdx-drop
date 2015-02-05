@@ -46,7 +46,7 @@ public class GameScreen implements Screen {
 
 	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));	  // Cached title image
 	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png")); 
-	private Texture bigBucket = new Texture(Gdx.files.internal("img/big_bucket.png"));
+	private Texture bigBucket = new Texture(Gdx.files.internal("img/bucket_gold.png"));
 	private Texture grassImage = new Texture(Gdx.files.internal("img/grass.png"));
 	
 	private ParticleEffect water = new ParticleEffect();
@@ -128,8 +128,6 @@ public class GameScreen implements Screen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		Gdx.input.setInputProcessor(stage);
 		
-		System.out.println(delta);
-		
 		draw(delta);
 		
 		stage.act();
@@ -193,6 +191,7 @@ public class GameScreen implements Screen {
 				bucket.width = bigBucket.getWidth();
 				bucket.height = bigBucket.getHeight();
 				batch.draw(bigBucket, bucket.x, bucket.y);
+				mBitmapFont.draw(batch, String.valueOf((int)goldDrop.getTimeRemaining()), DropGame.WIDTH - 95, DropGame.HEIGHT - 20);
 			} else {
 				goldDrop = null;
 				bucket.width = bucketImage.getWidth();
@@ -223,9 +222,9 @@ public class GameScreen implements Screen {
 			FallingObject object = iter.next();
 			object.y -= (250 * dropSpeed) * Gdx.graphics.getDeltaTime();
 			// Raindrop is off screen
-			if (object.y + object.getImage().getHeight() < 0 && object.getType() == Type.RAINDROP) {
+			if (object.y + object.getImage().getHeight() < 0) {
 				iter.remove();
-				if (!gameOver) {
+				if (object.getType() == Type.RAINDROP && !gameOver) {
 					gameOver();
 				}
 			}

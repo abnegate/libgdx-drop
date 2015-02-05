@@ -16,13 +16,14 @@ public class GoldDrop extends FallingObject {
 	}
 	
 	/**
-	 * 
-	 * @param delta
+	 * Countdown time until gold runs out
+	 * @param delta The time passed in seconds since this method was last called
 	 */
 	public void update(float delta) {
 		if (active) {
 			timeRemaining -= delta;
 			if (timeRemaining < 0) active = false;
+			System.out.println(timeRemaining);
 		}
 	}
 
@@ -40,5 +41,13 @@ public class GoldDrop extends FallingObject {
 	 */
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	/**
+	 * Get the time remaining for this gold drop
+	 * @return The time remaining for this gold drop in seconds
+	 */
+	public float getTimeRemaining() {
+		return timeRemaining;
 	}
 }
