@@ -45,6 +45,7 @@ public class GameScreen implements Screen {
 
 	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));	  // Cached title image
 	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png")); 
+	private Texture grassImage = new Texture(Gdx.files.internal("img/grass.png"));
 	
 	private ParticleEffect water = new ParticleEffect();
 	private ParticleEffect fire = new ParticleEffect();
@@ -93,7 +94,7 @@ public class GameScreen implements Screen {
 
 		// Sets the position of the bucket image
 		bucket.x = DropGame.WIDTH / 2 - bucketImage.getWidth() / 2;
-		bucket.y = 20;
+		bucket.y = grassImage.getHeight()+10;
 		bucket.width = bucketImage.getWidth();
 		bucket.height = bucketImage.getHeight();
 
@@ -124,7 +125,7 @@ public class GameScreen implements Screen {
 		
 		draw(delta);
 		
-		stage.act(delta);
+		stage.act();
 		stage.draw();
 		
 		// If screen is touched
@@ -185,6 +186,8 @@ public class GameScreen implements Screen {
 			fallingObjects.get(i).draw(batch);
 		}
 		
+		batch.draw(grassImage, 0, 0);
+		
 		water.draw(batch);
 		fire.draw(batch);
 		ice.draw(batch);
@@ -219,7 +222,6 @@ public class GameScreen implements Screen {
 	/**
 	 * 
 	 * @param object
-	 * @param iter
 	 */
 	private void catchObject(FallingObject object) {
 		if (object.getType() == Type.RAINDROP) {
@@ -260,6 +262,7 @@ public class GameScreen implements Screen {
 		.show(stage);
 
 		gameOver = true;
+		
 		if (actionResolver.getSignedInGPGS()) {
 			actionResolver.submitScoreGPGS(Integer.valueOf(score));
 			if (Integer.valueOf(score) > 100) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAQ");
