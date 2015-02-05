@@ -1,6 +1,7 @@
 package com.jakebarnby.drop;
 
 import java.util.Iterator;
+
 import java.util.Random;
 
 import com.badlogic.gdx.Game;
@@ -45,11 +46,14 @@ public class GameScreen implements Screen {
 
 	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));	  // Cached title image
 	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png")); 
+	private Texture bigBucket = new Texture(Gdx.files.internal("img/big_bucket.png"));
 	private Texture grassImage = new Texture(Gdx.files.internal("img/grass.png"));
 	
 	private ParticleEffect water = new ParticleEffect();
 	private ParticleEffect fire = new ParticleEffect();
 	private ParticleEffect ice = new ParticleEffect();
+	private ParticleEffect gold = new ParticleEffect();
+	
 	
 	private Sound dropSound; 	// Cached raindrop sound
 	private Sound bombSound;
@@ -66,6 +70,7 @@ public class GameScreen implements Screen {
 	
 	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
 	private ActionResolver actionResolver;
+	private GoldDrop goldDrop;
 	
 	private boolean gameOver = false;
 	
@@ -123,6 +128,8 @@ public class GameScreen implements Screen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		Gdx.input.setInputProcessor(stage);
 		
+		System.out.println(delta);
+		
 		draw(delta);
 		
 		stage.act();
@@ -151,16 +158,11 @@ public class GameScreen implements Screen {
 		FallingObject object;
 		
 		Random rand = new Random();
-		if (rand.nextInt(15) == 0) {
-			object = new FallingObject("droplet_red.png", Type.BOMB);
-		}
-		else if (rand.nextInt(15) == 0) {
-			object = new FallingObject("droplet_white.png", Type.HAIL);
-		}
-		else {
-			object = new FallingObject("droplet_blue.png", Type.RAINDROP);
-		}
-		
+		if (rand.nextInt(15) == 0) object = new FallingObject("droplet_red.png", Type.BOMB);
+		else if (rand.nextInt(15) == 0) object = new FallingObject("droplet_white.png", Type.HAIL);
+		else if (rand.nextInt(10) == 0) object = new GoldDrop("droplet_gold.png", Type.GOLD);
+		else object = new FallingObject("droplet_blue.png", Type.RAINDROP);
+
 		object.x = MathUtils.random(0, DropGame.WIDTH - object.getImage().getWidth());
 		object.y = DropGame.HEIGHT - titleImage.getHeight();
 		object.width = object.getImage().getWidth();
@@ -180,10 +182,24 @@ public class GameScreen implements Screen {
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		batch.draw(titleImage, 0, DropGame.HEIGHT - titleImage.getHeight());
-		batch.draw(bucketImage, bucket.x, bucket.y);
-		
+
 		for (int i = 0; i < fallingObjects.size; i++) {
 			fallingObjects.get(i).draw(batch);
+		}
+		
+		if (goldDrop != null) {
+			if (goldDrop.isActive()) {
+				goldDrop.update(delta);
+				bucket.width = bigBucket.getWidth();
+				bucket.height = bigBucket.getHeight();
+				batch.draw(bigBucket, bucket.x, bucket.y);
+			} else {
+				goldDrop = null;
+				bucket.width = bucketImage.getWidth();
+				bucket.height = bucketImage.getHeight();
+			}
+		} else {
+			batch.draw(bucketImage, bucket.x, bucket.y);
 		}
 		
 		batch.draw(grassImage, 0, 0);
@@ -191,9 +207,11 @@ public class GameScreen implements Screen {
 		water.draw(batch);
 		fire.draw(batch);
 		ice.draw(batch);
+		//gold.draw(batch);
 		water.update(delta);
 		fire.update(delta);
 		ice.update(delta);
+		//gold.update(delta);
 		
 		// Draw players current score
 		mBitmapFont.draw(batch, score, 40, DropGame.HEIGHT - 20);
@@ -250,16 +268,30 @@ public class GameScreen implements Screen {
 			ice.start();
 			gameOver();
 		}
+		else if (object.getType() == Type.GOLD) {
+			goldDrop = (GoldDrop) object;
+			if (DropGame.SOUND_ON) {
+				// sound.play();
+			}
+			//gold.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height/2);
+			//gold.start();
+			
+			((GoldDrop) object).setActive(true);
+			
+			
+		}
 	}
 
 	/**
 	 * 
 	 */
 	private void gameOver() {
-		new DropDialog("Game Over", new Skin(						
+		GameOverDialog d = new GameOverDialog("Game Over", new Skin(						
 				Gdx.files.internal("skins/menuSkin.json"),
-				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))))
-		.show(stage);
+				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))));
+		d.pack();
+		d.setPosition(DropGame.WIDTH/2 - d.getWidth()/2, DropGame.HEIGHT/2 - d.getHeight()/2);
+		stage.addActor(d);
 
 		gameOver = true;
 		
@@ -281,11 +313,14 @@ public class GameScreen implements Screen {
 		if (DropGame.SOUND_ON) {
 			dropSound.dispose();
 			bombSound.dispose();
+			freezeSound.dispose();
 			rainMusic.dispose();
 		}
 		bucketImage.dispose();
+		grassImage.dispose();
 		water.dispose();
 		fire.dispose();
+		ice.dispose();
 		batch.dispose();
 	}
 
@@ -301,10 +336,19 @@ public class GameScreen implements Screen {
 	@Override
 	public void resume() {}
 	
-	
-	public class DropDialog extends Dialog {
+	/**
+	 * Game Over dialog for Drop game
+	 * @author Jake Barnby
+	 *
+	 */
+	public class GameOverDialog extends Dialog {
 
-		public DropDialog(String title, Skin skin) {
+		/**
+		 * Create's a new game over dialog
+		 * @param title The title for this dialog
+		 * @param skin The skin for this dialog
+		 */
+		public GameOverDialog(String title, Skin skin) {
 			super(title, skin);
 			
 			button("Back", "Back");
