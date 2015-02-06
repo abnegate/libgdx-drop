@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 /**
  * A raindrop that falls down the screen in Drop game
+ * 
  * @author Jake Barnby
  * 
  * 10 February 2015
@@ -63,5 +64,12 @@ public class FallingObject extends Rectangle {
 	 */
 	public Type getType() {
 		return type;
+	}
+	
+	/**
+	 * Disposes of the image associated with this faling object
+	 */
+	public void dispose() {
+		dropletImage.dispose();
 	}
 }

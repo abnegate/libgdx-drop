@@ -14,7 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
- * Mani menu screen of Drop game
+ * Main menu screen of Drop game
+ * 
  * @author Jake Barnby
  * 
  * 5 February 2015
@@ -22,7 +23,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  */
 public class MainMenuScreen implements Screen {
 
-	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT)); // Create stage with viewport of given virtual size
+	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT));
 
 	//Create skin for menu
 	private Skin skin = new Skin( 

@@ -4,8 +4,10 @@ import com.badlogic.gdx.Game;
 
 /**
  * Main entry point for Drop game
+ * 
  * @author Jake Barnby
  *
+ * 5 February 2015
  */
 public class DropGame extends Game {
 	

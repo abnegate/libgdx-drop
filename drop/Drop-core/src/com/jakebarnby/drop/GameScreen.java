@@ -1,7 +1,6 @@
 package com.jakebarnby.drop;
 
 import java.util.Iterator;
-
 import java.util.Random;
 
 import com.badlogic.gdx.Game;
@@ -28,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.jakebarnby.drop.FallingObject.Type;
 
 /**
@@ -60,7 +60,7 @@ public class GameScreen implements Screen {
 	private Sound dropSound;
 	private Sound bombSound;
 	private Sound freezeSound;
-	private Sound goldSound;
+	private Music goldMusic;
 	private Music rainMusic;
 
 	private Rectangle bucket = new Rectangle();						//Contains the bucket
@@ -68,14 +68,17 @@ public class GameScreen implements Screen {
 
 	private SpriteBatch batch = new SpriteBatch();					//Batch used for drawing objects 		
 	private OrthographicCamera camera = new OrthographicCamera();	//Camera used for showing the stage
-	private BitmapFont mBitmapFont;									//Font used for score and timers
+	private BitmapFont font;									//Font used for score and timers
 	private String score = "0";										//Players current score
 	
-	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
+	private Stage stage = new Stage(new StretchViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
 	private ActionResolver actionResolver;
 	
 	private GoldDrop goldDrop;										//GoldDrop stored when gold mode activated
 	private boolean gameOver = false;								//Whether it's game over or not
+	
+	private int goldsActivated = 0;
+	private int evilCaught = 0;
 	
 	/**
 	 * 
@@ -93,7 +96,7 @@ public class GameScreen implements Screen {
 			bombSound = Gdx.audio.newSound(Gdx.files.internal("audio/explosion.wav"));
 			dropSound = Gdx.audio.newSound(Gdx.files.internal("audio/drop.wav"));
 			freezeSound = Gdx.audio.newSound(Gdx.files.internal("audio/freeze.wav"));
-			goldSound = Gdx.audio.newSound(Gdx.files.internal("audio/gold.wav"));
+			goldMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/gold.wav"));
 			rainMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/rain.mp3"));
 			rainMusic.setLooping(true);
 			rainMusic.play();
@@ -116,8 +119,8 @@ public class GameScreen implements Screen {
 		FreeTypeFontParameter parameters = new FreeTypeFontParameter();
 		parameters.size = 70;
 
-		mBitmapFont = generator.generateFont(parameters);
-		mBitmapFont.setColor(1f, 1f, 1f, 1);
+		font = generator.generateFont(parameters);
+		font.setColor(1f, 1f, 1f, 1);
 		generator.dispose();
 		
 		// Load all particle effects
@@ -218,7 +221,7 @@ public class GameScreen implements Screen {
 				bucket.width = goldBucket.getWidth();
 				bucket.height = goldBucket.getHeight();
 				batch.draw(goldBucket, bucket.x, bucket.y);
-				mBitmapFont.draw(batch, String.valueOf((int)goldDrop.getTimeRemaining()), DropGame.WIDTH - 95, DropGame.HEIGHT - 20);
+				font.draw(batch, String.valueOf((int)goldDrop.getTimeRemaining()), DropGame.WIDTH - 95, DropGame.HEIGHT - 20);
 				
 			} else {
 				//Gold drop has finished, reset it and reset the bucket constraints
@@ -231,7 +234,7 @@ public class GameScreen implements Screen {
 		}
 		
 		// Draw players current score
-		mBitmapFont.draw(batch, score, 40, DropGame.HEIGHT - 20);
+		font.draw(batch, score, 40, DropGame.HEIGHT - 20);
 		batch.end();
 		
 		// Draw falling objects moving moving
@@ -242,6 +245,7 @@ public class GameScreen implements Screen {
 			
 			// Raindrop is off screen
 			if (object.y + object.getImage().getHeight() < 0) {
+				object.dispose();
 				iter.remove();
 				if (object.getType() == Type.RAINDROP && !gameOver) {
 					gameOver();
@@ -251,6 +255,7 @@ public class GameScreen implements Screen {
 			// Raindrop is caught
 			if (object.overlaps(bucket) && !gameOver) {
 				catchObject(object);
+				object.dispose();
 				iter.remove();
 			}
 		}
@@ -275,9 +280,10 @@ public class GameScreen implements Screen {
 			if (DropGame.SOUND_ON) {
 				bombSound.play();
 			}
+			fire.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height- 5);
+			fire.start();
+			evilCaught++;
 			if (goldDrop == null) {
-				fire.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height- 5);
-				fire.start();
 				gameOver();
 			}
 		}
@@ -285,28 +291,32 @@ public class GameScreen implements Screen {
 			if (DropGame.SOUND_ON) {
 				freezeSound.play();
 			}
+			ice.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height/2);
+			ice.start();
+			evilCaught++;
 			if (goldDrop == null) {
-				ice.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height/2);
-				ice.start();
 				gameOver();
 			}
 		}
 		else if (object.getType() == Type.GOLD) {
-			goldDrop = (GoldDrop) object;
 			if (DropGame.SOUND_ON) {
-				goldSound.play();
+				goldMusic.play();
 			}
-			gold.start();
-			goldDrop.setActive(true);
-			
-			
+			if (goldDrop == null) {
+				goldDrop = (GoldDrop) object;
+				gold.start();
+				goldDrop.setActive(true);
+				goldsActivated++;
+			}
+
 		}
 	}
 
 	/**
-	 * 
+	 * Shows a game over dialog and checks if achievements should be unlocked
 	 */
 	private void gameOver() {
+		// Create game over dialog and set its position, then show it
 		GameOverDialog d = new GameOverDialog("Game Over", new Skin(						
 				Gdx.files.internal("skins/menuSkin.json"),
 				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))));
@@ -317,14 +327,22 @@ public class GameScreen implements Screen {
 		gameOver = true;
 		
 		if (actionResolver.getSignedInGPGS()) {
+			// Submit users score and check if achievements should be unlocked
 			actionResolver.submitScoreGPGS(Integer.valueOf(score));
 			if (Integer.valueOf(score) > 100) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAQ");
 			if (Integer.valueOf(score) > 200) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAg");
 			if (Integer.valueOf(score) > 300) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAw");
 			if (Integer.valueOf(score) > 400) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBA");
 			if (Integer.valueOf(score) > 500) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBQ");
-			if (Integer.valueOf(score) > 750) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBg");
-			if (Integer.valueOf(score) > 1000) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQCA");
+			
+			if (goldsActivated >= 3) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBg");
+			if (goldsActivated >= 5) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQCg");
+			
+			if (evilCaught >= 50) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQCw");
+			if (evilCaught >= 100) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQDA");
+			
+			if (Integer.valueOf(score) > 500 && goldsActivated >= 5 && evilCaught >= 100) 
+				actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQDQ");
 		}
 	}
 
@@ -335,14 +353,20 @@ public class GameScreen implements Screen {
 			dropSound.dispose();
 			bombSound.dispose();
 			freezeSound.dispose();
+			goldMusic.dispose();
 			rainMusic.dispose();
 		}
+		titleImage.dispose();
 		bucketImage.dispose();
+		goldBucket.dispose();
 		grassImage.dispose();
 		water.dispose();
 		fire.dispose();
 		ice.dispose();
+		gold.dispose();
 		batch.dispose();
+		font.dispose();
+		stage.dispose();
 	}
 
 	@Override
@@ -359,7 +383,10 @@ public class GameScreen implements Screen {
 	
 	/**
 	 * Game Over dialog for Drop game
+	 * 
 	 * @author Jake Barnby
+	 * 
+	 * 5 February 2015
 	 *
 	 */
 	public class GameOverDialog extends Dialog {
@@ -379,10 +406,12 @@ public class GameScreen implements Screen {
 		
 		@Override 
 		protected void result(Object object) {
+			//User pressed back
 			if (((String)object).equals("Back")) {
 				dispose();
 				((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen(actionResolver));
 			}
+			//User pressed try again
 			else if (((String)object).equals("Try again")) {
 				dispose();
 				((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
