@@ -2,16 +2,20 @@ package com.jakebarnby.drop;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 /**
  * Main menu screen of Drop game
@@ -23,7 +27,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  */
 public class MainMenuScreen implements Screen {
 
-	private Stage stage = new Stage(new FitViewport(DropGame.WIDTH, DropGame.HEIGHT));
+	private Stage stage = new Stage(new StretchViewport(DropGame.WIDTH, DropGame.HEIGHT));
+	
+	private Texture texture = new Texture(Gdx.files.internal("img/menu_title.png"));
+	private Image menuImage = new Image(texture);
 
 	//Create skin for menu
 	private Skin skin = new Skin( 
@@ -69,7 +76,7 @@ public class MainMenuScreen implements Screen {
 		buttonSound.setName("Sound");
 		buttonExit.setName("Exit");
 
-		//Add all buttons to a table nad add table to the stage
+		//Add all buttons to a table and add table to the stage
 		Table table = new Table();
 		table.add(buttonPlay).size(DropGame.WIDTH, DropGame.HEIGHT / 15).row();
 		table.add(buttonLeader).size(DropGame.WIDTH, DropGame.HEIGHT / 15).row();
@@ -78,8 +85,11 @@ public class MainMenuScreen implements Screen {
 		table.add(buttonExit).size(DropGame.WIDTH, DropGame.HEIGHT / 15).row();
 		table.setFillParent(true);
 		table.bottom();
+		
+		menuImage.setPosition(0, DropGame.HEIGHT - menuImage.getHeight());
 
 		stage.addActor(table);
+		stage.addActor(menuImage);
 
 		Gdx.input.setInputProcessor(stage);
 	}
@@ -130,7 +140,18 @@ public class MainMenuScreen implements Screen {
 			
 			if (actor.getName().equals("Play")) {
 				if (!actionResolver.getSignedInGPGS()) actionResolver.loginGPGS();
-				((Game) Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
+				
+				Preferences prefs = Gdx.app.getPreferences("HOWTOPLAY");
+				if (!prefs.getBoolean("Shown")) {
+					
+					((Game) Gdx.app.getApplicationListener()).setScreen(new HowToPlayScreen(actionResolver));
+					prefs.putBoolean("Shown",true);
+					prefs.flush();
+				} else {
+					((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
+					prefs.putBoolean("Shown",false);
+					prefs.flush();
+				}
 			} 
 			else if (actor.getName().equals("Leaderboard")) {
 				if (actionResolver.getSignedInGPGS()) actionResolver.getLeaderboardGPGS();

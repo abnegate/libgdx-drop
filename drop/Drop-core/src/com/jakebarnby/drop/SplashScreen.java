@@ -47,7 +47,7 @@ public class SplashScreen implements Screen {
 		splashImage.addAction(Actions.sequence(delay(0.5f), fadeIn(1.5f), delay(2.0f), fadeOut(1.5f), run(new Runnable() {
             @Override
             public void run() {
-                ((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen(actionResolver));
+                ((Game)Gdx.app.getApplicationListener()).setScreen(new HowToPlayScreen(actionResolver));
             }
         })));
 	}

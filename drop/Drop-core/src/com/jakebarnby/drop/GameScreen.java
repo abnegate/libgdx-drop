@@ -26,7 +26,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.jakebarnby.drop.FallingObject.Type;
 
@@ -68,7 +67,7 @@ public class GameScreen implements Screen {
 
 	private SpriteBatch batch = new SpriteBatch();					//Batch used for drawing objects 		
 	private OrthographicCamera camera = new OrthographicCamera();	//Camera used for showing the stage
-	private BitmapFont font;									//Font used for score and timers
+	private BitmapFont font;										//Font used for score and timers
 	private String score = "0";										//Players current score
 	
 	private Stage stage = new Stage(new StretchViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
@@ -100,6 +99,7 @@ public class GameScreen implements Screen {
 			rainMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/rain.mp3"));
 			rainMusic.setLooping(true);
 			rainMusic.play();
+		
 		}
 
 		camera.setToOrtho(false, DropGame.WIDTH, DropGame.HEIGHT);
@@ -169,7 +169,7 @@ public class GameScreen implements Screen {
 		Random rand = new Random();
 		if (rand.nextInt(15) == 0) object = new FallingObject("droplet_red.png", Type.BOMB);
 		else if (rand.nextInt(15) == 0) object = new FallingObject("droplet_white.png", Type.HAIL);
-		else if (rand.nextInt(15) == 0) object = new GoldDrop("droplet_gold.png", Type.GOLD);
+		else if (rand.nextInt(50) == 0) object = new GoldDrop("droplet_gold.png", Type.GOLD);
 		else object = new FallingObject("droplet_blue.png", Type.RAINDROP);
 
 		//Set the droplets position and size
