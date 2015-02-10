@@ -132,8 +132,11 @@ public class HowToPlayScreen implements Screen {
 			getContentTable().add("\n").row();
 			getContentTable().add("\n").row();
 			
+			Label label = new Label("When a gold drop is caught,      \ngolden bucket mode is      \nactivated for 20 seconds      \nand any kind of drop      \nmay be caught.      \n", skin);
+			label.setAlignment(Align.center);
+			
 			getContentTable().add("");
-			getContentTable().add(new Label("When a gold drop is caught,\ngolden bucket mode is\nactivated and any kind\nof drop may be caught\n", skin)).align(Align.left);
+			getContentTable().add(label).align(Align.left);
 			getContentTable().row();
 			getContentTable().add("\n").row();
 		}

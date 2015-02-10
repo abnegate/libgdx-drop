@@ -53,7 +53,7 @@ public class GoldDrop extends FallingObject {
 	 * Get the time remaining for this gold drop
 	 * @return The time remaining for this gold drop in seconds
 	 */
-	public float getTimeRemaining() {
-		return timeRemaining;
+	public int getTimeRemaining() {
+		return (int) timeRemaining;
 	}
 }

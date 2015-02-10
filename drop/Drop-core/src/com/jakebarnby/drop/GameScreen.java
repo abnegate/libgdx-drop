@@ -44,7 +44,7 @@ public class GameScreen implements Screen {
 	private long lastDropTime; 													// Last time a raindrop was spawned
 
 	//Load all required textures
-	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));	  
+	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));
 	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png")); 
 	private Texture goldBucket = new Texture(Gdx.files.internal("img/bucket_gold.png"));
 	private Texture grassImage = new Texture(Gdx.files.internal("img/grass.png"));
@@ -117,7 +117,7 @@ public class GameScreen implements Screen {
 		FileHandle fontFile = Gdx.files.internal("fonts/RhumBanane.ttf");
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
 		FreeTypeFontParameter parameters = new FreeTypeFontParameter();
-		parameters.size = 70;
+		parameters.size = 55;
 
 		font = generator.generateFont(parameters);
 		font.setColor(1f, 1f, 1f, 1);
@@ -221,7 +221,7 @@ public class GameScreen implements Screen {
 				bucket.width = goldBucket.getWidth();
 				bucket.height = goldBucket.getHeight();
 				batch.draw(goldBucket, bucket.x, bucket.y);
-				font.draw(batch, String.valueOf((int)goldDrop.getTimeRemaining()), DropGame.WIDTH - 95, DropGame.HEIGHT - 20);
+				font.draw(batch, String.valueOf(goldDrop.getTimeRemaining()), DropGame.WIDTH - 80, DropGame.HEIGHT - 45);
 				
 			} else {
 				//Gold drop has finished, reset it and reset the bucket constraints
@@ -234,7 +234,7 @@ public class GameScreen implements Screen {
 		}
 		
 		// Draw players current score
-		font.draw(batch, score, 40, DropGame.HEIGHT - 20);
+		font.draw(batch, score, 30, DropGame.HEIGHT - 40);
 		batch.end();
 		
 		// Draw falling objects moving moving
