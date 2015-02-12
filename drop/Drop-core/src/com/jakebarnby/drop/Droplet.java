@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Rectangle;
  * 10 February 2015
  *
  */
-public class FallingObject extends Rectangle {
+public class Droplet extends Rectangle {
 
 	private static final long serialVersionUID = 7489554435827692114L;
 	
@@ -37,7 +37,7 @@ public class FallingObject extends Rectangle {
 	 * @param imageName The name of the image to load for the raindrop
 	 * @param typr The type of this falling object
 	 */
-	public FallingObject(String imageName, Type type) {
+	public Droplet(String imageName, Type type) {
 		dropletImage = new Texture(Gdx.files.internal("img/" + imageName));
 		this.type = type;
 	}

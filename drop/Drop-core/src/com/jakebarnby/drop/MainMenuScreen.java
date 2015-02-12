@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 /**
@@ -27,8 +26,10 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
  */
 public class MainMenuScreen implements Screen {
 
+	// Create stage to display title image and menu buttons
 	private Stage stage = new Stage(new StretchViewport(DropGame.WIDTH, DropGame.HEIGHT));
 	
+	//Create title image
 	private Texture texture = new Texture(Gdx.files.internal("img/menu_title.png"));
 	private Image menuImage = new Image(texture);
 
@@ -57,6 +58,7 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void show() {
+		//If sound is off make sure button reflects this
 		if (!DropGame.SOUND_ON) {
 			buttonSound.setText("Sound: Off");
 		}
@@ -116,6 +118,7 @@ public class MainMenuScreen implements Screen {
 	@Override
 	public void dispose() {
 		stage.dispose();
+		texture.dispose();
 		skin.dispose();
 	}
 
@@ -154,16 +157,12 @@ public class MainMenuScreen implements Screen {
 				}
 			} 
 			else if (actor.getName().equals("Leaderboard")) {
-				if (actionResolver.getSignedInGPGS()) actionResolver.getLeaderboardGPGS();
-				else {
-					actionResolver.loginGPGS();
-					System.out.println("Not logged in, attempting to log in");
+				if (actionResolver.getSignedInGPGS()) {
+					actionResolver.getLeaderboardGPGS();
 				}
 			} 
 			else if (actor.getName().equals("Achievements")) {
-				if (actionResolver.getSignedInGPGS()) actionResolver.getAchievementGPGS();
-				else actionResolver.loginGPGS();
-
+				actionResolver.getAchievementGPGS();
 			}
 			else if (actor.getName().equals("Sound")) {
 				if (DropGame.SOUND_ON) {

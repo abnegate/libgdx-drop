@@ -1,13 +1,13 @@
 package com.jakebarnby.drop;
 
 /**
- *  FallingObject which upgrades the bucket in Drop game
+ *  Droplet which upgrades the bucket in Drop game
  *  
  * @author Jake Barnby
  * 
  * 10 February 2015
  */
-public class GoldDrop extends FallingObject {
+public class GoldDroplet extends Droplet {
 	
 	private static final long serialVersionUID = 5010440322240743061L;
 	private boolean active = false;
@@ -18,7 +18,7 @@ public class GoldDrop extends FallingObject {
 	 * @param imageName The name of the image of this falling object
 	 * @param type The type of this falling object
 	 */
-	public GoldDrop(String imageName, Type type) {
+	public GoldDroplet(String imageName, Type type) {
 		super(imageName, type);
 	}
 	

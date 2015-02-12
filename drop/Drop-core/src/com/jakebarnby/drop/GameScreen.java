@@ -8,7 +8,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -27,7 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.jakebarnby.drop.FallingObject.Type;
+import com.jakebarnby.drop.Droplet.Type;
 
 /**
  * Main game screen for Drop game.
@@ -38,10 +37,10 @@ import com.jakebarnby.drop.FallingObject.Type;
  */
 public class GameScreen implements Screen {
 
-	private Array<FallingObject> fallingObjects = new Array<FallingObject>(); 	// List of the raindrops that fall
-	private long dropTimeGap = 800000000; 										// Total time in game, used for controlling speed
-	private float dropSpeed = 1f;												// Speed at which the raindrops fall
-	private long lastDropTime; 													// Last time a raindrop was spawned
+	private Array<Droplet> droplets = new Array<Droplet>(); 		// List of the raindrops that fall
+	private long dropTimeGap = 800000000; 							// Total time in game, used for controlling speed
+	private float dropSpeed = 1f;									// Speed at which the raindrops fall
+	private long lastDropTime; 										// Last time a raindrop was spawned
 
 	//Load all required textures
 	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));
@@ -73,15 +72,15 @@ public class GameScreen implements Screen {
 	private Stage stage = new Stage(new StretchViewport(DropGame.WIDTH, DropGame.HEIGHT), batch);
 	private ActionResolver actionResolver;
 	
-	private GoldDrop goldDrop;										//GoldDrop stored when gold mode activated
+	private GoldDroplet goldDroplet;								//GoldDroplet stored when gold bucket mode activated
 	private boolean gameOver = false;								//Whether it's game over or not
 	
-	private int goldsActivated = 0;
-	private int evilCaught = 0;
+	private int goldsActivated = 0;									//Total number of gold buckets activated
+	private int evilCaught = 0;										//Total evil droplets caught
 	
 	/**
-	 * 
-	 * @param actionResolver
+	 * Create a new game screen
+	 * @param actionResolver The action resolver used to resolve google play game service events
 	 */
 	public GameScreen(ActionResolver actionResolver) {
 		this.actionResolver = actionResolver;
@@ -90,8 +89,8 @@ public class GameScreen implements Screen {
 	@Override
 	public void show() {
 
+		//If sound is turned on, load sounds and music
 		if (DropGame.SOUND_ON) {
-			// Sound is turned on, load sounds and music
 			bombSound = Gdx.audio.newSound(Gdx.files.internal("audio/explosion.wav"));
 			dropSound = Gdx.audio.newSound(Gdx.files.internal("audio/drop.wav"));
 			freezeSound = Gdx.audio.newSound(Gdx.files.internal("audio/freeze.wav"));
@@ -99,7 +98,6 @@ public class GameScreen implements Screen {
 			rainMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/rain.mp3"));
 			rainMusic.setLooping(true);
 			rainMusic.play();
-		
 		}
 
 		camera.setToOrtho(false, DropGame.WIDTH, DropGame.HEIGHT);
@@ -110,20 +108,18 @@ public class GameScreen implements Screen {
 		bucket.width = bucketImage.getWidth();
 		bucket.height = bucketImage.getHeight();
 
-		// Instantiate rain drops
+		//Instantiate rain drops
 		spawnFallingOjbect();
 
-		// Get font asset for rendering text
-		FileHandle fontFile = Gdx.files.internal("fonts/RhumBanane.ttf");
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
+		//Get font asset for rendering text
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/RhumBanane.ttf"));
 		FreeTypeFontParameter parameters = new FreeTypeFontParameter();
 		parameters.size = 55;
-
 		font = generator.generateFont(parameters);
 		font.setColor(1f, 1f, 1f, 1);
 		generator.dispose();
 		
-		// Load all particle effects
+		//Load all particle effects
 		water.load(Gdx.files.internal("effects/water.p"), Gdx.files.internal("img"));
 		fire.load(Gdx.files.internal("effects/fire.p"), Gdx.files.internal("img"));
 		ice.load(Gdx.files.internal("effects/ice.p"), Gdx.files.internal("img"));
@@ -142,14 +138,14 @@ public class GameScreen implements Screen {
 		stage.act();
 		stage.draw();
 		
-		// If screen is touched
+		// If screen is touched and its not game over
 		if (Gdx.input.isTouched() && !gameOver) {
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(touchPos);
 			bucket.x = touchPos.x - bucket.width / 2;
 		}
 
-		// If need new raindrop
+		// If it's time for a new droplet to be created
 		if (TimeUtils.nanoTime() - lastDropTime > dropTimeGap) {
 			spawnFallingOjbect();
 		}
@@ -160,25 +156,26 @@ public class GameScreen implements Screen {
 	}
 	
 	/**
-	 * Create a new droplet and record the time it was spawned.
+	 * Create a new droplet and record the time it was spawned
 	 */
 	private void spawnFallingOjbect() {
-		FallingObject object;
+		Droplet droplet;
 		
 		//Randomly choose which kind of droplet to create
 		Random rand = new Random();
-		if (rand.nextInt(15) == 0) object = new FallingObject("droplet_red.png", Type.BOMB);
-		else if (rand.nextInt(15) == 0) object = new FallingObject("droplet_white.png", Type.HAIL);
-		else if (rand.nextInt(50) == 0) object = new GoldDrop("droplet_gold.png", Type.GOLD);
-		else object = new FallingObject("droplet_blue.png", Type.RAINDROP);
+		if (rand.nextInt(15) == 0)		droplet = new Droplet("droplet_red.png", Type.BOMB);
+		else if (rand.nextInt(15) == 0) droplet = new Droplet("droplet_white.png", Type.HAIL);
+		else if (rand.nextInt(50) == 0) droplet = new GoldDroplet("droplet_gold.png", Type.GOLD);
+		else 							droplet = new Droplet("droplet_blue.png", Type.RAINDROP);
 
 		//Set the droplets position and size
-		object.x = MathUtils.random(0, DropGame.WIDTH - object.getImage().getWidth());
-		object.y = DropGame.HEIGHT - titleImage.getHeight();
-		object.width = object.getImage().getWidth();
-		object.height = object.getImage().getHeight();
+		droplet.x = MathUtils.random(0, DropGame.WIDTH - droplet.getImage().getWidth());
+		droplet.y = DropGame.HEIGHT - titleImage.getHeight();
+		droplet.width = droplet.getImage().getWidth();
+		droplet.height = droplet.getImage().getHeight();
 		
-		fallingObjects.add(object);
+		//Add the droplet to the collection and record the time it spawned
+		droplets.add(droplet);
 		lastDropTime = TimeUtils.nanoTime();
 	}
 	
@@ -204,28 +201,28 @@ public class GameScreen implements Screen {
 		ice.update(delta);
 		gold.update(delta);
 
-		// Draw all falling objects
-		for (int i = 0; i < fallingObjects.size; i++) {
-			fallingObjects.get(i).draw(batch);
+		// Draw all droplets
+		for (int i = 0; i < droplets.size; i++) {
+			droplets.get(i).draw(batch);
 		}
 		
 		// Draw grass
 		batch.draw(grassImage, 0, 0);
 	
-		if (goldDrop != null) {
-			if (goldDrop.isActive()) {
+		if (goldDroplet != null) {
+			if (goldDroplet.isActive()) {
 				// Gold drop is active, update its position to current touch x position,
 				// Draw the gold bucket and the timer
-				goldDrop.update(delta);
+				goldDroplet.update(delta);
 				gold.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height/2);
 				bucket.width = goldBucket.getWidth();
 				bucket.height = goldBucket.getHeight();
 				batch.draw(goldBucket, bucket.x, bucket.y);
-				font.draw(batch, String.valueOf(goldDrop.getTimeRemaining()), DropGame.WIDTH - 80, DropGame.HEIGHT - 45);
+				font.draw(batch, String.valueOf(goldDroplet.getTimeRemaining()), DropGame.WIDTH - 80, DropGame.HEIGHT - 45);
 				
 			} else {
 				//Gold drop has finished, reset it and reset the bucket constraints
-				goldDrop = null;
+				goldDroplet = null;
 				bucket.width = bucketImage.getWidth();
 				bucket.height = bucketImage.getHeight();
 			}
@@ -237,36 +234,37 @@ public class GameScreen implements Screen {
 		font.draw(batch, score, 30, DropGame.HEIGHT - 40);
 		batch.end();
 		
-		// Draw falling objects moving moving
-		Iterator<FallingObject> iter = fallingObjects.iterator();
+		Iterator<Droplet> iter = droplets.iterator();
 		while (iter.hasNext()) {
-			FallingObject object = iter.next();
-			object.y -= (250 * dropSpeed) * Gdx.graphics.getDeltaTime();
+			Droplet droplet = iter.next();
 			
-			// Raindrop is off screen
-			if (object.y + object.getImage().getHeight() < 0) {
-				object.dispose();
+			// Update droplet y position
+			droplet.y -= (250 * dropSpeed) * Gdx.graphics.getDeltaTime();
+			
+			// Droplet is off screen
+			if (droplet.y + droplet.getImage().getHeight() < 0) {
+				droplet.dispose();
 				iter.remove();
-				if (object.getType() == Type.RAINDROP && !gameOver) {
+				if (droplet.getType() == Type.RAINDROP && !gameOver) {
 					gameOver();
 				}
 			}
 			
-			// Raindrop is caught
-			if (object.overlaps(bucket) && !gameOver) {
-				catchObject(object);
-				object.dispose();
+			// Droplet is caught
+			if (droplet.overlaps(bucket) && !gameOver) {
+				catchObject(droplet);
+				droplet.dispose();
 				iter.remove();
 			}
 		}
 	}
 	
 	/**
-	 * Logic for when a droplet is caught
-	 * @param object The droplet that was caught
+	 * Response for when a droplet is caught
+	 * @param droplet The droplet that was caught
 	 */
-	private void catchObject(FallingObject object) {
-		if (object.getType() == Type.RAINDROP) {
+	private void catchObject(Droplet droplet) {
+		if (droplet.getType() == Type.RAINDROP) {
 			if (DropGame.SOUND_ON) {
 				dropSound.play();
 			}
@@ -276,36 +274,36 @@ public class GameScreen implements Screen {
 			water.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height + 10);
 			water.start();
 		} 	
-		else if (object.getType() == Type.BOMB) {
+		else if (droplet.getType() == Type.BOMB) {
 			if (DropGame.SOUND_ON) {
 				bombSound.play();
 			}
 			fire.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height- 5);
 			fire.start();
 			evilCaught++;
-			if (goldDrop == null) {
+			if (goldDroplet == null) {
 				gameOver();
 			}
 		}
-		else if (object.getType() == Type.HAIL) {
+		else if (droplet.getType() == Type.HAIL) {
 			if (DropGame.SOUND_ON) {
 				freezeSound.play();
 			}
 			ice.setPosition(bucket.x + bucket.width/2, bucket.y + bucket.height/2);
 			ice.start();
 			evilCaught++;
-			if (goldDrop == null) {
+			if (goldDroplet == null) {
 				gameOver();
 			}
 		}
-		else if (object.getType() == Type.GOLD) {
+		else if (droplet.getType() == Type.GOLD) {
 			if (DropGame.SOUND_ON) {
 				goldMusic.play();
 			}
-			if (goldDrop == null) {
-				goldDrop = (GoldDrop) object;
+			if (goldDroplet == null) {
+				goldDroplet = (GoldDroplet) droplet;
 				gold.start();
-				goldDrop.setActive(true);
+				goldDroplet.setActive(true);
 				goldsActivated++;
 			}
 
@@ -327,6 +325,7 @@ public class GameScreen implements Screen {
 		gameOver = true;
 		
 		if (actionResolver.getSignedInGPGS()) {
+			
 			// Submit users score and check if achievements should be unlocked
 			actionResolver.submitScoreGPGS(Integer.valueOf(score));
 			if (Integer.valueOf(score) > 100) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAQ");

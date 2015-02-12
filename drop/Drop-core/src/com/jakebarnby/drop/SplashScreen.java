@@ -44,7 +44,7 @@ public class SplashScreen implements Screen {
 		
 		splashImage.setColor(1, 1, 1, 0);
 		splashImage.setPosition(DropGame.WIDTH/2 - splashImage.getWidth()/2, DropGame.HEIGHT/2 - splashImage.getHeight()/2);
-		splashImage.addAction(Actions.sequence(delay(0.5f), fadeIn(1.5f), delay(2.0f), fadeOut(1.5f), run(new Runnable() {
+		splashImage.addAction(Actions.sequence(fadeIn(1f), delay(1.5f), fadeOut(1f), run(new Runnable() {
             @Override
             public void run() {
                 ((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen(actionResolver));
@@ -54,8 +54,8 @@ public class SplashScreen implements Screen {
 
 	@Override
 	public void render(float delta) {
-        Gdx.gl.glClearColor(0,0,0,1); //sets clear color to black
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); //clear the batch
+        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         
         stage.act(delta);
         stage.draw();

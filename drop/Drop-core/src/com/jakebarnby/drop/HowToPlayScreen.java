@@ -6,13 +6,11 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
@@ -37,6 +35,7 @@ public class HowToPlayScreen implements Screen {
 
 	@Override
 	public void show() {
+		//Creates the dialog and adds it to the stage
 		HowToPlayDialog dialog = new HowToPlayDialog("How To Play", new Skin(						
 				Gdx.files.internal("skins/menuSkin.json"),
 				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))));
@@ -153,7 +152,7 @@ public class HowToPlayScreen implements Screen {
 		/**
 		 * Dispose of assets used when user leaves the dialog
 		 */
-		public void dispose() {
+		private void dispose() {
 			textures[0].dispose();
 			textures[1].dispose();
 			textures[2].dispose();
