@@ -5,6 +5,7 @@ import java.util.Random;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -74,9 +75,11 @@ public class GameScreen implements Screen {
 	
 	private GoldDroplet goldDroplet;								//GoldDroplet stored when gold bucket mode activated
 	private boolean gameOver = false;								//Whether it's game over or not
+	private boolean paused;
 	
 	private int goldsActivated = 0;									//Total number of gold buckets activated
 	private int evilCaught = 0;										//Total evil droplets caught
+
 	
 	/**
 	 * Create a new game screen
@@ -146,7 +149,7 @@ public class GameScreen implements Screen {
 		}
 
 		// If it's time for a new droplet to be created
-		if (TimeUtils.nanoTime() - lastDropTime > dropTimeGap) {
+		if (TimeUtils.nanoTime() - lastDropTime > dropTimeGap && !paused) {
 			spawnFallingOjbect();
 		}
 
@@ -208,6 +211,11 @@ public class GameScreen implements Screen {
 		
 		// Draw grass
 		batch.draw(grassImage, 0, 0);
+		
+		//User pressed back key, open pause menu
+		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.E)){
+			pause();
+		}
 	
 		if (goldDroplet != null) {
 			if (goldDroplet.isActive()) {
@@ -239,7 +247,9 @@ public class GameScreen implements Screen {
 			Droplet droplet = iter.next();
 			
 			// Update droplet y position
-			droplet.y -= (250 * dropSpeed) * Gdx.graphics.getDeltaTime();
+			if (!paused) {
+				droplet.y -= (250 * dropSpeed) * Gdx.graphics.getDeltaTime();
+			}
 			
 			// Droplet is off screen
 			if (droplet.y + droplet.getImage().getHeight() < 0) {
@@ -315,9 +325,9 @@ public class GameScreen implements Screen {
 	 */
 	private void gameOver() {
 		// Create game over dialog and set its position, then show it
-		GameOverDialog d = new GameOverDialog("Game Over", new Skin(						
+		InGameDialog d = new InGameDialog("Game Over", new Skin(						
 				Gdx.files.internal("skins/menuSkin.json"),
-				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))));
+				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))), false);
 		d.pack();
 		d.setPosition(DropGame.WIDTH/2 - d.getWidth()/2, DropGame.HEIGHT/2 - d.getHeight()/2);
 		stage.addActor(d);
@@ -375,10 +385,20 @@ public class GameScreen implements Screen {
 	public void hide() {}
 
 	@Override
-	public void pause() {}
+	public void pause() { 
+		if (!paused && !gameOver) {
+			InGameDialog d = new InGameDialog("Paused", new Skin(						
+					Gdx.files.internal("skins/menuSkin.json"),
+					new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))), true);
+			d.pack();
+			d.setPosition(DropGame.WIDTH/2 - d.getWidth()/2, DropGame.HEIGHT/2 - d.getHeight()/2);
+			stage.addActor(d);
+			paused = true;
+		}
+	}
 
 	@Override
-	public void resume() {}
+	public void resume() { paused = false;}
 	
 	/**
 	 * Game Over dialog for Drop game
@@ -388,32 +408,47 @@ public class GameScreen implements Screen {
 	 * 5 February 2015
 	 *
 	 */
-	public class GameOverDialog extends Dialog {
+	public class InGameDialog extends Dialog {
 
 		/**
 		 * Create's a new game over dialog
 		 * @param title The title for this dialog
 		 * @param skin The skin for this dialog
 		 */
-		public GameOverDialog(String title, Skin skin) {
+		public InGameDialog(String title, Skin skin, boolean isPaused) {
 			super(title, skin);
 			
-			button("Back", "Back");
-			button("Try again", "Try again");
-			text("\n      You lose!\nYour score: " + Integer.valueOf(score) + "\n");
+			//Create a pause dialog
+			if (isPaused) {
+				button("Yes", "Back");
+				button("No", "Resume");
+				text("\nReturn to main menu?\n");
+			//Create a game over dialog
+			} else {
+				button("Back", "Back");
+				button("Try again", "Try again");
+				text("\n      You lose!\nYour score: " + Integer.valueOf(score) + "\n");
+			}
 		}
 		
 		@Override 
 		protected void result(Object object) {
-			//User pressed back
-			if (((String)object).equals("Back")) {
-				dispose();
-				((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen(actionResolver));
-			}
-			//User pressed try again
-			else if (((String)object).equals("Try again")) {
-				dispose();
-				((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
+			if (object != null) {
+				//User pressed back
+				if (((String)object).equals("Back")) {
+					dispose();
+					((Game)Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen(actionResolver));
+				}
+				//User pressed try again
+				else if (((String)object).equals("Try again")) {
+					dispose();
+					((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
+				}
+				
+				else if (((String)object).equals("Resume")) {
+					remove();
+					resume();
+				}
 			}
 		}
 

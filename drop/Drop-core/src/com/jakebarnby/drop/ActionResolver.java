@@ -25,7 +25,7 @@ public interface ActionResolver {
 	 */
 	public void submitScoreGPGS(int score);
 	
-	/*
+	/**
 	 * Unlock the google play game services achievement with the given id
 	 */
 	public void unlockAchievementGPGS(String achievementId);
