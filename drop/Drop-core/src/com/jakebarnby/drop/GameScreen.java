@@ -379,10 +379,14 @@ public class GameScreen implements Screen {
 	}
 
 	@Override
-	public void resize(int width, int height) {}
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height, true);
+	}
 
 	@Override
-	public void hide() {}
+	public void hide() {
+		dispose();
+	}
 
 	@Override
 	public void pause() { 
@@ -422,12 +426,12 @@ public class GameScreen implements Screen {
 			if (isPaused) {
 				button("Yes", "Back");
 				button("No", "Resume");
-				text("\nReturn to main menu?\n");
+				text("\nReturn to main menu?\n\n");
 			//Create a game over dialog
 			} else {
 				button("Back", "Back");
 				button("Try again", "Try again");
-				text("\n      You lose!\nYour score: " + Integer.valueOf(score) + "\n");
+				text("\n      You lose!\nYour score: " + Integer.valueOf(score) + "\n\n");
 			}
 		}
 		

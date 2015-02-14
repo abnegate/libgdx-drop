@@ -41,7 +41,6 @@ public class HowToPlayScreen implements Screen {
 				new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))));
 		dialog.pack();
 		dialog.setPosition(DropGame.WIDTH/2 - dialog.getWidth()/2, DropGame.HEIGHT/2 - dialog.getHeight()/2);
-		
 		stage.addActor(dialog);
 	}
 
@@ -56,19 +55,25 @@ public class HowToPlayScreen implements Screen {
 	}
 
 	@Override
-	public void resize(int width, int height) {}
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height, true);
+	}
 
+	@Override
+	public void hide() {
+		dispose();
+	}
+
+	@Override
+	public void dispose() {
+		stage.dispose();
+	}
+	
 	@Override
 	public void pause() {}
 
 	@Override
 	public void resume() {}
-
-	@Override
-	public void hide() {}
-
-	@Override
-	public void dispose() {}
 	
 	/**
 	 * A dialog which contains instructions on how to play the game
