@@ -91,6 +91,7 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void show() {
+		Gdx.input.setCatchBackKey(true);
 
 		//If sound is turned on, load sounds and music
 		if (DropGame.SOUND_ON) {
@@ -213,7 +214,7 @@ public class GameScreen implements Screen {
 		batch.draw(grassImage, 0, 0);
 		
 		//User pressed back key, open pause menu
-		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.E)){
+		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.E) || Gdx.input.isKeyPressed(Keys.HOME)){
 			pause();
 		}
 	
@@ -385,7 +386,6 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void hide() {
-		dispose();
 	}
 
 	@Override
@@ -395,7 +395,7 @@ public class GameScreen implements Screen {
 					Gdx.files.internal("skins/menuSkin.json"),
 					new TextureAtlas(Gdx.files.internal("skins/menuSkin.pack"))), true);
 			d.pack();
-			d.setPosition(DropGame.WIDTH/2 - d.getWidth()/2, DropGame.HEIGHT/2 - d.getHeight()/2);
+		  	d.setPosition(DropGame.WIDTH/2 - d.getWidth()/2, DropGame.HEIGHT/2 - d.getHeight()/2);
 			stage.addActor(d);
 			paused = true;
 		}
@@ -418,6 +418,7 @@ public class GameScreen implements Screen {
 		 * Create's a new game over dialog
 		 * @param title The title for this dialog
 		 * @param skin The skin for this dialog
+		 * @param isPaused Whether this is a dialog that pauses the game or not
 		 */
 		public InGameDialog(String title, Skin skin, boolean isPaused) {
 			super(title, skin);
