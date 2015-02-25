@@ -1,4 +1,4 @@
-package com.jakebarnby.drop;
+package com.jakebarnby.drop.screens;
 
 import java.util.Iterator;
 import java.util.Random;
@@ -27,6 +27,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.jakebarnby.drop.ActionResolver;
+import com.jakebarnby.drop.DropGame;
+import com.jakebarnby.drop.Droplet;
+import com.jakebarnby.drop.GoldDroplet;
 import com.jakebarnby.drop.Droplet.Type;
 
 /**
@@ -39,8 +43,8 @@ import com.jakebarnby.drop.Droplet.Type;
 public class GameScreen implements Screen {
 
 	private Array<Droplet> droplets = new Array<Droplet>(); 		// List of the raindrops that fall
-	private long dropTimeGap = 800000000; 							// Total time in game, used for controlling speed
-	private float dropSpeed = 1f;									// Speed at which the raindrops fall
+	private long dropTimeGap = 700000000; 							// Total time in game, used for controlling speed
+	private float dropSpeed = 1.2f;									// Speed at which the raindrops fall
 	private long lastDropTime; 										// Last time a raindrop was spawned
 
 	//Load all required textures
@@ -113,7 +117,7 @@ public class GameScreen implements Screen {
 		bucket.height = bucketImage.getHeight();
 
 		//Instantiate rain drops
-		spawnFallingOjbect();
+		spawnDroplet();
 
 		//Get font asset for rendering text
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/RhumBanane.ttf"));
@@ -151,7 +155,7 @@ public class GameScreen implements Screen {
 
 		// If it's time for a new droplet to be created
 		if (TimeUtils.nanoTime() - lastDropTime > dropTimeGap && !paused) {
-			spawnFallingOjbect();
+			spawnDroplet();
 		}
 
 		// Increase droplet speed and decrease time between spawning
@@ -162,7 +166,7 @@ public class GameScreen implements Screen {
 	/**
 	 * Create a new droplet and record the time it was spawned
 	 */
-	private void spawnFallingOjbect() {
+	private void spawnDroplet() {
 		Droplet droplet;
 		
 		//Randomly choose which kind of droplet to create
@@ -188,6 +192,8 @@ public class GameScreen implements Screen {
 	 * @param delta The time in seconds since this method was last called
 	 */
 	private void draw(float delta) {
+		//TODO: Fix gold drop timer still counting down when paused
+		
 		camera.update();
 		
 		// Begin drawing and draw clouds
@@ -385,8 +391,7 @@ public class GameScreen implements Screen {
 	}
 
 	@Override
-	public void hide() {
-	}
+	public void hide() {}
 
 	@Override
 	public void pause() { 
@@ -402,7 +407,11 @@ public class GameScreen implements Screen {
 	}
 
 	@Override
-	public void resume() { paused = false;}
+	public void resume() {}
+	
+	private void myResume() {
+		paused = false;
+	}
 	
 	/**
 	 * Game Over dialog for Drop game
@@ -452,7 +461,7 @@ public class GameScreen implements Screen {
 				
 				else if (((String)object).equals("Resume")) {
 					remove();
-					resume();
+					myResume();
 				}
 			}
 		}

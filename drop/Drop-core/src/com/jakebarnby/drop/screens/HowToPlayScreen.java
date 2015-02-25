@@ -1,4 +1,4 @@
-package com.jakebarnby.drop;
+package com.jakebarnby.drop.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -13,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.jakebarnby.drop.ActionResolver;
+import com.jakebarnby.drop.DropGame;
 
 /**
  * A screen which displays a dialog instructing the user of how to play the game
@@ -119,19 +121,19 @@ public class HowToPlayScreen implements Screen {
 		 */
 		private void createContentTable() {
 			getContentTable().add("\n").row();
-			getContentTable().add(images[0]).align(Align.center);
+			getContentTable().add(images[0]);
 			getContentTable().add(new Label("Water drops must be caught", skin)).align(Align.left);
 			getContentTable().row();
 			
-			getContentTable().add(images[1]).align(Align.center);
+			getContentTable().add(images[1]);
 			getContentTable().add(new Label("Fire drops must not be caught", skin)).align(Align.left);
 			getContentTable().row();
 			
-			getContentTable().add(images[2]).align(Align.center);
+			getContentTable().add(images[2]);
 			getContentTable().add(new Label("Ice drops must not be caught", skin)).align(Align.left);
 			getContentTable().row();
 			
-			getContentTable().add(images[3]).align(Align.center);
+			getContentTable().add(images[3]);
 			getContentTable().add(new Label("Gold drops may be caught", skin)).align(Align.left);
 			getContentTable().add("\n").row();
 			getContentTable().add("\n").row();

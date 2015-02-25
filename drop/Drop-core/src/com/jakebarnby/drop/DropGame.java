@@ -1,6 +1,7 @@
 package com.jakebarnby.drop;
 
 import com.badlogic.gdx.Game;
+import com.jakebarnby.drop.screens.SplashScreen;
 
 /**
  * Main entry point for Drop game

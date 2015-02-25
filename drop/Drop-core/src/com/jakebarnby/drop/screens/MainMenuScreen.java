@@ -1,4 +1,4 @@
-package com.jakebarnby.drop;
+package com.jakebarnby.drop.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -15,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.jakebarnby.drop.ActionResolver;
+import com.jakebarnby.drop.DropGame;
 
 /**
  * Main menu screen of Drop game
@@ -139,8 +141,6 @@ public class MainMenuScreen implements Screen {
 	private class MenuListener extends ChangeListener {
 		@Override
 		public void changed(ChangeEvent event, Actor actor) {
-			//TODO: Crashes on button press if user logs out of GPGS
-			
 			if (actor.getName().equals("Play")) {
 				if (!actionResolver.getSignedInGPGS()) actionResolver.loginGPGS();
 				
