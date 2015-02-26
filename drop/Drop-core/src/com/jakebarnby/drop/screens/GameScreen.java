@@ -44,11 +44,11 @@ public class GameScreen implements Screen {
 
 	private Array<Droplet> droplets = new Array<Droplet>(); 		// List of the raindrops that fall
 	private long dropTimeGap = 700000000; 							// Total time in game, used for controlling speed
-	private float dropSpeed = 1.2f;									// Speed at which the raindrops fall
+	private float dropSpeed = 1.15f;								// Speed at which the raindrops fall
 	private long lastDropTime; 										// Last time a raindrop was spawned
 
 	//Load all required textures
-	private Texture titleImage = new Texture(Gdx.files.internal("img/drop.png"));
+	private Texture cloudImage = new Texture(Gdx.files.internal("img/clouds.png"));
 	private Texture bucketImage = new Texture(Gdx.files.internal("img/bucket.png")); 
 	private Texture goldBucket = new Texture(Gdx.files.internal("img/bucket_gold.png"));
 	private Texture grassImage = new Texture(Gdx.files.internal("img/grass.png"));
@@ -178,7 +178,7 @@ public class GameScreen implements Screen {
 
 		//Set the droplets position and size
 		droplet.x = MathUtils.random(0, DropGame.WIDTH - droplet.getImage().getWidth());
-		droplet.y = DropGame.HEIGHT - titleImage.getHeight();
+		droplet.y = DropGame.HEIGHT - cloudImage.getHeight() + 5;
 		droplet.width = droplet.getImage().getWidth();
 		droplet.height = droplet.getImage().getHeight();
 		
@@ -199,7 +199,7 @@ public class GameScreen implements Screen {
 		// Begin drawing and draw clouds
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		batch.draw(titleImage, 0, DropGame.HEIGHT - titleImage.getHeight());
+		batch.draw(cloudImage, 0, DropGame.HEIGHT - cloudImage.getHeight());
 		
 		// Draw and update particle effects
 		water.draw(batch);
@@ -323,7 +323,6 @@ public class GameScreen implements Screen {
 				goldDroplet.setActive(true);
 				goldsActivated++;
 			}
-
 		}
 	}
 
@@ -340,28 +339,33 @@ public class GameScreen implements Screen {
 		stage.addActor(d);
 
 		gameOver = true;
-		
+		checkAchievements();
+	}
+
+	/**
+	 * Check if achievements were unlocked during this game
+	 */
+	private void checkAchievements() {
 		if (actionResolver.getSignedInGPGS()) {
 			
 			// Submit users score and check if achievements should be unlocked
 			actionResolver.submitScoreGPGS(Integer.valueOf(score));
-			if (Integer.valueOf(score) > 100) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAQ");
-			if (Integer.valueOf(score) > 200) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAg");
-			if (Integer.valueOf(score) > 300) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAw");
-			if (Integer.valueOf(score) > 400) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBA");
-			if (Integer.valueOf(score) > 500) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBQ");
+			if (Integer.valueOf(score) >= 50) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAQ");
+			if (Integer.valueOf(score) >= 100) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAg");
+			if (Integer.valueOf(score) >= 150) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQAw");
+			if (Integer.valueOf(score) >= 200) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBA");
+			if (Integer.valueOf(score) >= 300) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBQ");
 			
 			if (goldsActivated >= 3) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQBg");
 			if (goldsActivated >= 5) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQCg");
 			
-			if (evilCaught >= 50) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQCw");
-			if (evilCaught >= 100) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQDA");
+			if (evilCaught >= 25) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQCw");
+			if (evilCaught >= 50) actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQDA");
 			
-			if (Integer.valueOf(score) > 500 && goldsActivated >= 5 && evilCaught >= 100) 
+			if (Integer.valueOf(score) >= 300 && goldsActivated >= 5 && evilCaught >= 75) 
 				actionResolver.unlockAchievementGPGS("CgkIi_fxh5MEEAIQDQ");
 		}
 	}
-
 
 	@Override
 	public void dispose() {
@@ -372,7 +376,7 @@ public class GameScreen implements Screen {
 			goldMusic.dispose();
 			rainMusic.dispose();
 		}
-		titleImage.dispose();
+		cloudImage.dispose();
 		bucketImage.dispose();
 		goldBucket.dispose();
 		grassImage.dispose();
