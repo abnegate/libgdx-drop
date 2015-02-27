@@ -9,16 +9,21 @@ import com.google.example.games.basegameutils.GameHelper;
 import com.google.example.games.basegameutils.GameHelper.GameHelperListener;
 import com.jakebarnby.drop.ActionResolver;
 import com.jakebarnby.drop.DropGame;
+import com.startapp.android.publish.StartAppAd;
+import com.startapp.android.publish.StartAppSDK;
 
 public class MainActivity extends AndroidApplication implements ActionResolver, GameHelperListener {
 	
 	private static final String LEADERBOARD_ID = "CgkIi_fxh5MEEAIQBw";
 	
+	private StartAppAd startAppAd = new StartAppAd(this);
 	private GameHelper gameHelper;
 	
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		StartAppSDK.init(this, "109453066", "202424753", true);
 		
 		initialize(new DropGame(this));
 		
@@ -39,6 +44,18 @@ public class MainActivity extends AndroidApplication implements ActionResolver, 
 	public void onStop() {
 		super.onStart();
 		gameHelper.onStop();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		startAppAd.onResume();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		startAppAd.onPause();
 	}
 	
 	@Override
@@ -101,5 +118,10 @@ public class MainActivity extends AndroidApplication implements ActionResolver, 
 
 	@Override
 	public void onSignInSucceeded() {	
+	}
+
+	@Override
+	public void showInterstitial() {
+		startAppAd.onBackPressed();
 	}
 }

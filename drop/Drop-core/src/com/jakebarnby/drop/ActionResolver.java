@@ -39,4 +39,9 @@ public interface ActionResolver {
 	 * Get and show google play game services achievements
 	 */
 	public void getAchievementGPGS();
+	
+	/**
+	 * Show an interstitial ad on exit
+	 */
+	public void showInterstitial();
 }

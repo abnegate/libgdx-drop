@@ -36,4 +36,9 @@ public class ActionResolverDesktop implements ActionResolver {
 		System.out.println("getAchievementsGPGS");
 	}
 
+	@Override
+	public void showInterstitial() {
+		System.out.println("Ad shown");
+	}
+
 }

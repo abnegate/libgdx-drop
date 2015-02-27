@@ -220,7 +220,7 @@ public class GameScreen implements Screen {
 		batch.draw(grassImage, 0, 0);
 		
 		//User pressed back key, open pause menu
-		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.E) || Gdx.input.isKeyPressed(Keys.HOME)){
+		if (Gdx.input.isKeyPressed(Keys.BACK)) {
 			pause();
 		}
 	

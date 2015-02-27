@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -60,6 +61,8 @@ public class MainMenuScreen implements Screen {
 
 	@Override
 	public void show() {
+		Gdx.input.setCatchBackKey(true);
+		
 		//If sound is off make sure button reflects this
 		if (!DropGame.SOUND_ON) {
 			buttonSound.setText("Sound: Off");
@@ -105,6 +108,11 @@ public class MainMenuScreen implements Screen {
 
 		stage.act(delta);
 		stage.draw();
+		
+		if (Gdx.input.isKeyPressed(Keys.BACK) || Gdx.input.isKeyPressed(Keys.HOME)) {
+			Gdx.app.exit();
+			actionResolver.showInterstitial();
+		}
 	}
 
 	@Override
@@ -174,6 +182,7 @@ public class MainMenuScreen implements Screen {
 				}
 			} else if ((actor.getName().equals("Exit"))) {
 				Gdx.app.exit();
+				actionResolver.showInterstitial();
 			}
 		}
 	}
