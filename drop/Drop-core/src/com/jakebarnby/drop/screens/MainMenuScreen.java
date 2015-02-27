@@ -156,12 +156,10 @@ public class MainMenuScreen implements Screen {
 				Preferences prefs = Gdx.app.getPreferences("HOWTOPLAY");
 				if (!prefs.getBoolean("Shown")) {
 					((Game) Gdx.app.getApplicationListener()).setScreen(new HowToPlayScreen(actionResolver));
-					//prefs.putBoolean("Shown",true);
-					//prefs.flush();
+					prefs.putBoolean("Shown",true);
+					prefs.flush();
 				} else {
 					((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreen(actionResolver));
-					prefs.putBoolean("Shown", false);
-					prefs.flush();
 				}
 			} 
 			else if (actor.getName().equals("Leaderboard")) {
